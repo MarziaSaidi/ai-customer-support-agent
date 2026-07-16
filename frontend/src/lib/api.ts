@@ -9,6 +9,17 @@ export interface AuthResponse {
   companyId: number | null;
 }
 
+export interface UserProfile {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  companyId: number | null;
+  companyName: string | null;
+  emailVerified: boolean;
+}
+
 export interface MessageResponse {
   id: number;
   role: string;
@@ -35,26 +46,66 @@ export interface AnalyticsResponse {
   customerSatisfaction: number;
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+export interface Company {
+  id: number;
+  name: string;
+  slug: string;
+  website: string | null;
+  aiSystemPrompt: string | null;
+  createdAt: string;
+}
+
+export interface CompanyMember {
+  id: number;
+  userId: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  joinedAt: string;
+}
+
+export class ApiError extends Error {
+  status: number;
+  errors?: Record<string, string>;
+
+  constructor(message: string, status: number, errors?: Record<string, string>) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.errors = errors;
+  }
+}
+
+type RequestOptions = RequestInit & {
+  token?: string | null;
+};
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const { token, ...init } = options;
+  const authToken = token !== undefined ? token : (typeof window !== "undefined" ? localStorage.getItem("token") : null);
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(options.headers as Record<string, string>),
+    ...(init.headers as Record<string, string>),
   };
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`;
   }
 
   const response = await fetch(`${API_URL}${path}`, {
-    ...options,
+    ...init,
     headers,
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: "Request failed" }));
-    throw new Error(error.message || "Request failed");
+    const body = await response.json().catch(() => ({ message: "Request failed" }));
+    throw new ApiError(body.message || "Request failed", response.status, body.errors);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json();
@@ -67,10 +118,29 @@ export const api = {
     firstName: string;
     lastName: string;
     companyName: string;
-  }) => request<AuthResponse>("/auth/register", { method: "POST", body: JSON.stringify(data) }),
+  }) => request<AuthResponse>("/auth/register", { method: "POST", body: JSON.stringify(data), token: null }),
 
   login: (data: { email: string; password: string }) =>
-    request<AuthResponse>("/auth/login", { method: "POST", body: JSON.stringify(data) }),
+    request<AuthResponse>("/auth/login", { method: "POST", body: JSON.stringify(data), token: null }),
+
+  getMe: (token?: string) => request<UserProfile>("/auth/me", { token }),
+
+  getCompany: (companyId: number) => request<Company>(`/companies/${companyId}`),
+
+  updateCompany: (companyId: number, data: { name?: string; website?: string; aiSystemPrompt?: string }) =>
+    request<Company>(`/companies/${companyId}`, { method: "PUT", body: JSON.stringify(data) }),
+
+  getCompanyMembers: (companyId: number) =>
+    request<CompanyMember[]>(`/companies/${companyId}/members`),
+
+  addCompanyMember: (companyId: number, data: { email: string; role: string }) =>
+    request<CompanyMember>(`/companies/${companyId}/members`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  removeCompanyMember: (companyId: number, userId: number) =>
+    request<void>(`/companies/${companyId}/members/${userId}`, { method: "DELETE" }),
 
   getAnalytics: (companyId: number) =>
     request<AnalyticsResponse>(`/analytics?companyId=${companyId}`),
@@ -82,12 +152,13 @@ export const api = {
     const params = new URLSearchParams({ companyId: String(companyId) });
     if (customerEmail) params.set("customerEmail", customerEmail);
     if (customerName) params.set("customerName", customerName);
-    return request<ChatSessionResponse>(`/chat/widget/sessions?${params}`, { method: "POST" });
+    return request<ChatSessionResponse>(`/chat/widget/sessions?${params}`, { method: "POST", token: null });
   },
 
   sendWidgetMessage: (sessionId: number, content: string) =>
     request<ChatSessionResponse>(`/chat/widget/sessions/${sessionId}/messages`, {
       method: "POST",
       body: JSON.stringify({ content }),
+      token: null,
     }),
 };
