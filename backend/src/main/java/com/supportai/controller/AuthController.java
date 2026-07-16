@@ -3,9 +3,14 @@ package com.supportai.controller;
 import com.supportai.dto.AuthResponse;
 import com.supportai.dto.LoginRequest;
 import com.supportai.dto.RegisterRequest;
+import com.supportai.dto.UserProfileResponse;
+import com.supportai.exception.UnauthorizedException;
 import com.supportai.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,5 +36,13 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @GetMapping("/me")
+    public UserProfileResponse me(@AuthenticationPrincipal UserDetails principal) {
+        if (principal == null) {
+            throw new UnauthorizedException("Not authenticated");
+        }
+        return authService.getCurrentUser(principal.getUsername());
     }
 }
