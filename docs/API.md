@@ -18,7 +18,7 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 | POST | `/auth/reset-password` | Public | 🔲 | Reset with token |
 | POST | `/auth/verify-email` | Public | 🔲 | Verify email with token |
 | POST | `/auth/resend-verification` | JWT | 🔲 | Resend verification email |
-| GET | `/auth/me` | JWT | 🔲 | Current user profile |
+| GET | `/auth/me` | JWT | ✅ | Current user profile |
 
 ### POST `/auth/register`
 
@@ -56,6 +56,22 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 ```
 
 **Response (200):** Same shape as register.
+
+### GET `/auth/me`
+
+**Response (200):**
+```json
+{
+  "id": 1,
+  "email": "admin@acme.com",
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "role": "ADMIN",
+  "companyId": 1,
+  "companyName": "Acme Corp",
+  "emailVerified": false
+}
+```
 
 ---
 

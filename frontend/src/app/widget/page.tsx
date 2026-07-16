@@ -60,7 +60,7 @@ export default function WidgetPage() {
 
       <Card className="flex h-[600px] w-full max-w-md flex-col">
         <CardHeader className="border-b py-4">
-          <CardTitle className="text-base">SupportAI Chat</CardTitle>
+          <CardTitle className="text-base">SupportIQ Chat</CardTitle>
           <p className="text-xs text-muted-foreground">Ask about orders, refunds, or anything else.</p>
         </CardHeader>
         <CardContent className="flex flex-1 flex-col overflow-hidden p-0">

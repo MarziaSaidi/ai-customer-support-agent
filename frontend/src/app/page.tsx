@@ -37,9 +37,9 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">
-              SA
+              IQ
             </div>
-            <span className="text-lg font-semibold">SupportAI</span>
+            <span className="text-lg font-semibold">SupportIQ</span>
           </div>
           <nav className="flex items-center gap-3">
             <Link href="/login">
@@ -55,14 +55,14 @@ export default function Home() {
       <main className="flex-1">
         <section className="mx-auto max-w-6xl px-6 py-20 text-center">
           <Badge variant="secondary" className="mb-4">
-            AI Customer Support SaaS
+            RAG-Powered Support SaaS
           </Badge>
           <h1 className="mx-auto max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
-            Automate customer support with AI that knows your business
+            AI customer support that answers from your documentation
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Embed a chat widget on your site. The AI answers from your docs, performs actions like
-            refunds and order lookups, and escalates to humans when needed.
+            Upload PDFs and FAQs. SupportIQ searches your knowledge base, answers customers,
+            creates tickets when needed, and tracks what people ask most.
           </p>
           <div className="mt-8 flex justify-center gap-4">
             <Link href="/register">
@@ -113,7 +113,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t py-8 text-center text-sm text-muted-foreground">
-        SupportAI &mdash; AI Customer Support Agent
+        SupportIQ &mdash; AI-Powered Customer Support Platform
       </footer>
     </div>
   );

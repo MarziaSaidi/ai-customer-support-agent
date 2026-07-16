@@ -1,20 +1,24 @@
-# Locked Decisions
+# Locked Decisions — SupportIQ
+
+**Product:** SupportIQ — AI-Powered Customer Support Platform
+
+See [PROJECT.md](./PROJECT.md) for full spec and [RESPONSIBILITIES.md](./RESPONSIBILITIES.md) for who owns what.
 
 Decisions confirmed before implementation. Change only with explicit agreement.
 
 | Area | Decision | Notes |
 |------|----------|-------|
-| Vector DB | PostgreSQL + pgvector | Single database for relational + vector search |
-| Message queue | RabbitMQ | Email, doc processing, background AI tasks |
-| Email | SendGrid | Password reset, verification, ticket notifications |
-| File storage | **Local filesystem** | Dev/MVP; S3 deferred |
-| Deployment | **Local + Docker Compose** | No AWS EC2 for now |
-| Scope | **Full spec** | All features in original description |
+| Product name | **SupportIQ** | UI/branding; repo folder unchanged |
+| Vector DB | PostgreSQL + pgvector | `document_chunks.embedding` |
+| Message queue | RabbitMQ | Doc processing, background AI jobs |
+| Email | SendGrid | Deferred to Day 12–13 stretch |
+| File storage | **Local filesystem** (dev) | S3 interface for production (Day 13) |
+| Deployment | Docker Compose → EC2/Render | Day 13 |
+| Plan | **14-day roadmap** | See [ROADMAP.md](./ROADMAP.md) |
 | Backend | Java 21, Spring Boot 3.4, JWT | |
 | Frontend | Next.js, TypeScript, Tailwind, shadcn/ui | |
-| Cache | Redis | Sessions, FAQ cache, rate limiting |
-| Real-time | Spring WebSocket | Live chat, typing, agent alerts |
-| Search | PostgreSQL full-text search | Elasticsearch optional later |
+| Cache | Redis | Sessions, rate limiting |
+| AI | OpenAI RAG + function calling | Day 7 + Day 9 |
 
 ## Deferred (post-MVP)
 

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: ai-customer-support-agent
+    name: supportiq
 
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/support_ai}

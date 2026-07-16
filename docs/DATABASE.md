@@ -1,8 +1,42 @@
-# Database Schema
+# Database Schema — SupportIQ
 
-PostgreSQL 16 with **pgvector** extension. Hibernate `ddl-auto: update` for local dev; Flyway migrations added in a later phase.
+PostgreSQL 16 with **pgvector**. Hibernate `ddl-auto: update` for local dev.
 
-## Entity relationship overview
+## Target schema (canonical — per PROJECT.md)
+
+```
+users ──┬── company_users ── companies
+        │
+companies ── documents ── document_chunks (embedding vector)
+         └── conversations ── messages
+                          └── tickets
+```
+
+| Table | Key columns |
+|-------|-------------|
+| `users` | id, email, password_hash |
+| `companies` | id, name |
+| `company_users` | user_id, company_id, role |
+| `documents` | id, company_id, filename |
+| `document_chunks` | id, document_id, content, embedding |
+| `conversations` | id, company_id, customer_email |
+| `messages` | id, conversation_id, role, content |
+| `tickets` | id, conversation_id, status, priority |
+
+## Current implementation vs target
+
+| Target | Current code | Migration |
+|--------|--------------|-----------|
+| `company_users` | `users.company_id` + `users.role` | **Day 3** — add join table |
+| `document_chunks` | `ai_embeddings` | **Day 5** — rename entity/table |
+| `conversations` | `chat_sessions` | **Day 8** — rename entity/table |
+| `documents.filename` | `documents.title` + `file_url` | **Day 4** — align fields |
+
+Extra tables in current code (kept for full spec): `orders`, `refunds`, `notifications`, `feedback`.
+
+---
+
+## Entity relationship (current code)
 
 ```
 companies ──┬── users

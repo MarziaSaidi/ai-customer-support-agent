@@ -1,77 +1,176 @@
-# Build Roadmap
+# 14-Day Development Plan
 
-Track progress day by day. Update status as phases complete.
+Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 
-## Locked stack
-
-See [DECISIONS.md](./DECISIONS.md).
+**Responsibilities:** see [RESPONSIBILITIES.md](./RESPONSIBILITIES.md) — Marzia owns architecture, building, testing, deployment; AI assists.
 
 ---
 
-## Progress
+## Progress tracker
 
-| Day | Phase | Status | Deliverable |
+| Day | Focus | Status | Owner test? |
 |-----|-------|--------|-------------|
-| 1 | Plan + contracts | ✅ Done | API docs, DB schema, scaffold fixes |
-| 2 | Auth — register/login | ⚪ Pending | JWT auth hardened |
-| 3 | Auth — reset/verify | ⚪ Pending | SendGrid emails |
-| 4 | RBAC | ⚪ Pending | Role guards |
-| 5 | Company onboarding | ⚪ Pending | Company flows |
-| 6 | Dashboard shell | ⚪ Pending | Protected layout |
-| 7 | Team management | ⚪ Pending | Invites |
-| 8 | Doc upload API | ⚪ Pending | Local file storage |
-| 9 | Doc processing | ⚪ Pending | RabbitMQ jobs |
-| 10 | Doc UI | ⚪ Pending | Upload UI |
-| 11 | Embeddings | ⚪ Pending | pgvector |
-| 12 | RAG retrieval | ⚪ Pending | Context assembly |
-| 13 | Chat backend | ⚪ Pending | Full pipeline |
-| 14 | Chat widget | ⚪ Pending | Embeddable widget |
-| 15 | Chat polish | ⚪ Pending | Escalation + feedback |
-| 16–20 | Tickets + actions | ⚪ Pending | |
-| 21–24 | Analytics + notifications | ⚪ Pending | |
-| 25–27 | WebSocket | ⚪ Pending | |
-| 28–30 | Polish + tests | ⚪ Pending | |
+| 1 | Project setup | ✅ Done | — |
+| 2 | Authentication | ✅ Done | [x] Marzia |
+| 3 | Company dashboard | ✅ Done | [ ] Marzia test |
+| 4 | Document upload | ⚪ Pending | |
+| 5 | Document processing pipeline | ⚪ Pending | |
+| 6 | Vector search (pgvector) | ⚪ Pending | |
+| 7 | Connect AI (RAG) | ⚪ Pending | |
+| 8 | Chat interface | ⚪ Pending | |
+| 9 | AI function calling | ⚪ Pending | |
+| 10 | Ticket system | ⚪ Pending | |
+| 11 | Analytics dashboard | ⚪ Pending | |
+| 12 | Testing | ⚪ Pending | |
+| 13 | Deployment | ⚪ Pending | |
+| 14 | Portfolio polish | ⚪ Pending | |
 
 ---
 
-## Day 1 — Plan + contracts
+## Day 1 — Project setup ✅
+
+**Build:** Spring Boot, Next.js, PostgreSQL, Docker
+
+**Learn:** Spring structure, REST API basics
+
+**Done:**
+- Monorepo scaffold
+- Docker Compose (Postgres + pgvector, Redis, RabbitMQ)
+- API & database contract docs
+
+---
+
+## Day 2 — Authentication ✅
+
+**Build:** Register, login, JWT, protected routes
+
+**Tables:** Users, roles, companies (initial — migrate to `company_users` on Day 3)
+
+**Done:**
+- JWT auth, `/auth/me`, RBAC roles on user
+- Frontend auth context, protected/guest routes
+- Auth tests
+
+**Marzia:** manually test signup/login
+
+---
+
+## Day 3 — Company dashboard ✅
+
+**Build:** Dashboard UI, team members, `company_users` table
 
 ### Me (AI)
-- [x] API contract document
-- [x] Database schema document
-- [x] Locked decisions document
-- [x] Fix scaffold gaps (local storage, env, README)
-- [x] Verify compile/lint
+- [x] `company_users` entity + membership on register
+- [x] Team APIs (list, add, remove) with admin guards
+- [x] Company settings API (PUT)
+- [x] Dashboard shell with sidebar (Overview, Team, Settings)
+- [x] Company controller tests
 
-### You
-- [ ] Confirm RabbitMQ OK
-- [ ] Review API + DB docs
-- [ ] SendGrid key ready by Day 3
-- [ ] OpenAI key ready by Day 11
-
----
-
-## Day 2 — Auth register/login
-
-### Me
-- Harden auth service
-- Add `/auth/me` endpoint
-- Frontend auth context + token refresh pattern
-- Input validation + error handling
-
-### You
-- Test signup and login manually
-- Report any UX issues
+### You (Marzia)
+- [ ] Test dashboard navigation
+- [ ] Test Settings page (change company name / AI prompt)
+- [ ] Register a second user, add them as Support Agent on Team page
+- [ ] Confirm Support Agent cannot save settings
 
 ---
 
-## Responsibility quick reference
+## Day 4 — Document upload
 
-| Task type | Owner |
-|-----------|-------|
-| Write code | AI |
-| API keys & accounts | You |
-| Manual testing | You |
-| Product rules | You |
-| Architecture docs | AI |
-| Phase approval | You |
+**Build:**
+- Upload PDF
+- Store metadata in DB
+- Store file (local dev; S3-ready interface)
+
+**Learn:** multipart upload, file handling
+
+---
+
+## Day 5 — Document processing pipeline
+
+**Build:**
+```
+PDF → Text extraction → Chunking → Embeddings
+```
+Use RabbitMQ for async jobs. Rename `ai_embeddings` → `document_chunks` per target schema.
+
+---
+
+## Day 6 — Vector search
+
+**Build:** pgvector similarity search
+
+**Test:** Question *"How do refunds work?"* → finds refund policy chunk
+
+---
+
+## Day 7 — Connect AI (RAG)
+
+**Build:**
+```
+User question → Retrieve documents → GPT with context → Answer + source citation
+```
+
+---
+
+## Day 8 — Chat interface
+
+**Build:** Chat UI, message history, conversation storage
+
+Rename `chat_sessions` → `conversations` per target schema.
+
+---
+
+## Day 9 — AI function calling
+
+**Functions:**
+- `checkOrderStatus()`
+- `createTicket()`
+- `cancelRequest()` / `searchDocumentation()`
+
+---
+
+## Day 10 — Ticket system
+
+**Build:** Create, assign, update status, internal notes
+
+---
+
+## Day 11 — Analytics
+
+**Charts:** conversations, resolved %, common questions, response time
+
+---
+
+## Day 12 — Testing
+
+**Backend:** JUnit, Mockito  
+**API:** Postman collection  
+**Marzia:** define test cases, verify edge cases
+
+---
+
+## Day 13 — Deployment
+
+**Deploy:** backend, frontend, database via Docker  
+**Target:** local Docker first; EC2 or Render when ready
+
+---
+
+## Day 14 — Portfolio polish
+
+**README:** architecture diagram, screenshots, demo video link, API docs
+
+**Marzia:** record demo, write portfolio description
+
+---
+
+## What changed from the old 30-day plan
+
+| Old plan | New 14-day plan |
+|----------|-----------------|
+| Day 3: email reset/verify | Deferred (add during Day 12–13 if needed) |
+| Day 3–5: auth extras | Compressed into Day 2 ✅ |
+| 30 days total | 14 days to portfolio-ready MVP |
+| Product name SupportAI | **SupportIQ** |
+
+Email verification (SendGrid) can be added in Day 12–13 or as a stretch goal — not blocking RAG MVP.

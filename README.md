@@ -1,6 +1,6 @@
-# AI Customer Support Agent
+# SupportIQ — AI-Powered Customer Support Platform
 
-A SaaS platform that helps businesses automate customer support using AI. Customers interact through an embeddable chat widget; the AI answers from company documentation and can perform actions like checking orders, processing refunds, or creating support tickets.
+A multi-tenant SaaS platform that uses **Retrieval-Augmented Generation (RAG)** to help businesses automate customer support — answering questions from documentation, creating tickets, and analyzing conversations.
 
 ## Architecture
 
@@ -17,116 +17,82 @@ A SaaS platform that helps businesses automate customer support using AI. Custom
          └────────┘  └──────────┘  └─────────────┘
 ```
 
+**RAG pipeline (Day 5–7):**
+```
+PDF Upload → Extract → Chunk → Embeddings → Vector store → GPT answer
+```
+
 ## Tech Stack
 
 | Layer | Technology |
 |-------|------------|
-| Backend | Java 21, Spring Boot 3, Spring Security, JWT |
 | Frontend | Next.js, React, TypeScript, Tailwind CSS, shadcn/ui |
-| Database | PostgreSQL with pgvector |
-| Cache | Redis |
+| Backend | Java 21, Spring Boot 3, Spring Security, JWT, Maven |
+| Database | PostgreSQL + pgvector |
+| AI | OpenAI API, embeddings, RAG, function calling |
 | Queue | RabbitMQ |
-| AI | OpenAI API + RAG (embeddings + vector search) |
-| Storage | Local filesystem (S3 deferred) |
-| Email | SendGrid |
-| Real-time | Spring WebSocket |
-| Monitoring | Prometheus + Grafana |
-
-## Project Structure
-
-```
-ai-customer-support-agent/
-├── backend/          # Spring Boot API
-├── frontend/         # Next.js dashboard + chat widget
-├── docker-compose.yml
-└── .github/workflows/
-```
+| Deployment | Docker, Docker Compose, GitHub Actions |
 
 ## Documentation
 
-- [API Contract](docs/API.md) — all endpoints (implemented + planned)
-- [Database Schema](docs/DATABASE.md) — tables and relationships
-- [Build Roadmap](docs/ROADMAP.md) — day-by-day plan
-- [Decisions](docs/DECISIONS.md) — locked stack choices
+| Doc | Description |
+|-----|-------------|
+| [PROJECT.md](docs/PROJECT.md) | Product definition & features |
+| [ROADMAP.md](docs/ROADMAP.md) | **14-day development plan** |
+| [RESPONSIBILITIES.md](docs/RESPONSIBILITIES.md) | Marzia vs AI ownership |
+| [API.md](docs/API.md) | API contract |
+| [DATABASE.md](docs/DATABASE.md) | Schema + migration notes |
+| [DECISIONS.md](docs/DECISIONS.md) | Locked stack choices |
+
+## Progress
+
+| Day | Status |
+|-----|--------|
+| 1 — Project setup | ✅ Done |
+| 2 — Authentication | ✅ Done |
+| 3 — Company dashboard | ⚪ Next |
 
 ## Quick Start
 
 ### Prerequisites
 
-- Java 21
-- Node.js 20+
-- Docker & Docker Compose
-- Maven 3.9+
+- Java 21, Node.js 20+, Docker & Docker Compose
 
-### 1. Clone and configure
+### Run locally (no Docker — quick auth testing)
 
-```bash
-cp .env.example .env
-# Edit .env with your API keys
-```
-
-### 2. Start infrastructure
-
-```bash
-docker compose up -d postgres redis rabbitmq
-```
-
-### 3. Run backend
+If Docker is not installed, use the **dev** profile (in-memory H2 database):
 
 ```bash
 cd backend
-./mvnw spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-### 4. Run frontend
+Then in a **second terminal**:
 
 ```bash
 cd frontend
-npm install
+npm install   # first time only
 npm run dev
 ```
 
-### 5. Full stack with Docker
+Open http://localhost:3000/register
 
-```bash
-docker compose up --build
-```
+### Run locally (with Docker — full stack)
 
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8080/api
-- RabbitMQ Management: http://localhost:15672
 
 ## Core Features
 
-- **Authentication** — Sign up, login, password reset, email verification, RBAC (Admin, Support Agent)
-- **Company Dashboard** — Team management, documentation upload, conversation history, AI settings
-- **Knowledge Base** — PDF, Word, FAQ, website pages, Markdown with vector search
-- **AI Chat** — Customer Q&A with escalation to human agents
-- **Ticket System** — Create, assign, track, and annotate support tickets
-- **AI Actions** — Order status, refunds, cancellations, address updates, password resets
-- **Analytics** — Resolution rate, response time, satisfaction, common questions
-- **Notifications** — Email and in-app alerts
-
-## API Overview
-
-| Endpoint | Description |
-|----------|-------------|
-| `POST /api/auth/register` | User registration |
-| `POST /api/auth/login` | JWT login |
-| `GET /api/companies` | Company management |
-| `POST /api/documents` | Upload knowledge base docs |
-| `POST /api/chat/sessions` | Start chat session |
-| `POST /api/chat/messages` | Send message |
-| `GET /api/tickets` | List support tickets |
-| `GET /api/analytics` | Dashboard metrics |
+1. **Company workspace** — multi-tenant accounts, Admin + Support Agent roles
+2. **AI knowledge base** — PDF/Markdown upload, chunking, vector search
+3. **AI chat** — RAG-powered customer Q&A with source citations
+4. **AI actions** — function calling (`checkOrderStatus`, `createTicket`)
+5. **Ticket system** — escalation when AI can't resolve
+6. **Analytics** — resolution rate, response time, top questions
 
 ## Development
 
 ```bash
-# Backend tests
 cd backend && ./mvnw test
-
-# Frontend lint
 cd frontend && npm run lint
 ```
 
