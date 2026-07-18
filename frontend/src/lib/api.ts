@@ -65,6 +65,16 @@ export interface CompanyMember {
   joinedAt: string;
 }
 
+export interface DocumentItem {
+  id: number;
+  title: string;
+  filename: string;
+  type: string;
+  fileUrl: string;
+  processed: boolean;
+  createdAt: string;
+}
+
 export class ApiError extends Error {
   status: number;
   errors?: Record<string, string>;
@@ -111,6 +121,27 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   return response.json();
 }
 
+async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ message: "Upload failed" }));
+    throw new ApiError(body.message || "Upload failed", response.status, body.errors);
+  }
+
+  return response.json();
+}
+
 export const api = {
   register: (data: {
     email: string;
@@ -141,6 +172,21 @@ export const api = {
 
   removeCompanyMember: (companyId: number, userId: number) =>
     request<void>(`/companies/${companyId}/members/${userId}`, { method: "DELETE" }),
+
+  getDocuments: (companyId: number) =>
+    request<DocumentItem[]>(`/documents?companyId=${companyId}`),
+
+  uploadDocument: (companyId: number, title: string, type: string, file: File) => {
+    const formData = new FormData();
+    formData.append("companyId", String(companyId));
+    formData.append("title", title);
+    formData.append("type", type);
+    formData.append("file", file);
+    return uploadRequest<DocumentItem>("/documents", formData);
+  },
+
+  deleteDocument: (documentId: number) =>
+    request<void>(`/documents/${documentId}`, { method: "DELETE" }),
 
   getAnalytics: (companyId: number) =>
     request<AnalyticsResponse>(`/analytics?companyId=${companyId}`),

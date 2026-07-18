@@ -78,9 +78,11 @@ export default function DashboardPage() {
                 Configure AI settings
               </Button>
             </Link>
-            <Button variant="outline" className="w-full justify-start" disabled>
-              Upload documentation (Day 4)
-            </Button>
+            <Link href="/dashboard/documents">
+              <Button variant="outline" className="w-full justify-start">
+                Upload documentation
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>

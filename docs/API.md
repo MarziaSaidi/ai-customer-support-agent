@@ -101,10 +101,10 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 
 | Method | Path | Auth | Status | Description |
 |--------|------|------|--------|-------------|
-| GET | `/documents` | JWT | 🔲 | List company documents |
-| POST | `/documents` | JWT Admin | 🔲 | Upload document (multipart) |
+| GET | `/documents` | JWT | ✅ | List company documents |
+| POST | `/documents` | JWT Admin | ✅ | Upload document (multipart) |
 | GET | `/documents/{id}` | JWT | 🔲 | Get document metadata |
-| DELETE | `/documents/{id}` | JWT Admin | 🔲 | Soft-delete document |
+| DELETE | `/documents/{id}` | JWT Admin | ✅ | Soft-delete document |
 | POST | `/documents/{id}/reprocess` | JWT Admin | 🔲 | Re-queue processing job |
 
 ### POST `/documents`

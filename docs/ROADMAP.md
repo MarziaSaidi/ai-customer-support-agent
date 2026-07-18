@@ -12,9 +12,9 @@ Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 |-----|-------|--------|-------------|
 | 1 | Project setup | ✅ Done | — |
 | 2 | Authentication | ✅ Done | [x] Marzia |
-| 3 | Company dashboard | ✅ Done | [ ] Marzia test |
-| 4 | Document upload | ⚪ Pending | |
-| 5 | Document processing pipeline | ⚪ Pending | |
+| 3 | Company dashboard | ✅ Done | [x] Marzia |
+| 4 | Document upload | ✅ Done | [ ] Marzia test |
+| 5 | Document processing pipeline | ⚪ Next | |
 | 6 | Vector search (pgvector) | ⚪ Pending | |
 | 7 | Connect AI (RAG) | ⚪ Pending | |
 | 8 | Chat interface | ⚪ Pending | |
@@ -67,21 +67,29 @@ Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 - [x] Company controller tests
 
 ### You (Marzia)
-- [ ] Test dashboard navigation
-- [ ] Test Settings page (change company name / AI prompt)
-- [ ] Register a second user, add them as Support Agent on Team page
-- [ ] Confirm Support Agent cannot save settings
+- [x] Test dashboard navigation
+- [x] Test Settings page (change company name / AI prompt)
+- [x] Register a second user, add them as Support Agent on Team page
+- [x] Confirm Support Agent cannot save settings
 
 ---
 
-## Day 4 — Document upload
+## Day 4 — Document upload ✅
 
-**Build:**
-- Upload PDF
-- Store metadata in DB
-- Store file (local dev; S3-ready interface)
+**Build:** Upload PDF, store file locally, save metadata in DB
 
-**Learn:** multipart upload, file handling
+### Me (AI)
+- [x] Multipart upload API (`POST /api/documents`)
+- [x] Local file storage under `uploads/{companyId}/`
+- [x] List and soft-delete documents
+- [x] Documents dashboard page
+- [x] Upload tests
+
+### You (Marzia)
+- [ ] Upload a sample PDF from `/dashboard/documents`
+- [ ] Confirm it appears in the list with status "Pending"
+- [ ] Confirm Support Agent can view but not upload
+- [ ] Test delete (admin)
 
 ---
 
