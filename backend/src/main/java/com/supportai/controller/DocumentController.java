@@ -57,4 +57,13 @@ public class DocumentController {
     ) {
         documentService.deleteDocument(id, principal.getUsername());
     }
+
+    @PostMapping("/{id}/reprocess")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void reprocessDocument(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        documentService.reprocessDocument(id, principal.getUsername());
+    }
 }

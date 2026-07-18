@@ -9,6 +9,7 @@ import com.supportai.enums.RoleType;
 import com.supportai.exception.BadRequestException;
 import com.supportai.exception.ResourceNotFoundException;
 import com.supportai.exception.UnauthorizedException;
+import com.supportai.messaging.DocumentProcessingDispatcher;
 import com.supportai.repository.CompanyRepository;
 import com.supportai.repository.CompanyUserRepository;
 import com.supportai.repository.DocumentRepository;
@@ -28,19 +29,22 @@ public class DocumentService {
     private final CompanyUserRepository companyUserRepository;
     private final UserRepository userRepository;
     private final LocalStorageService localStorageService;
+    private final DocumentProcessingDispatcher documentProcessingDispatcher;
 
     public DocumentService(
             DocumentRepository documentRepository,
             CompanyRepository companyRepository,
             CompanyUserRepository companyUserRepository,
             UserRepository userRepository,
-            LocalStorageService localStorageService
+            LocalStorageService localStorageService,
+            DocumentProcessingDispatcher documentProcessingDispatcher
     ) {
         this.documentRepository = documentRepository;
         this.companyRepository = companyRepository;
         this.companyUserRepository = companyUserRepository;
         this.userRepository = userRepository;
         this.localStorageService = localStorageService;
+        this.documentProcessingDispatcher = documentProcessingDispatcher;
     }
 
     public List<DocumentResponse> listDocuments(Long companyId, String requesterEmail) {
@@ -81,7 +85,10 @@ public class DocumentService {
         document.setProcessed(false);
         document.setActive(true);
 
-        return toResponse(documentRepository.save(document));
+        Document saved = documentRepository.save(document);
+        documentProcessingDispatcher.dispatch(saved.getId());
+
+        return toResponse(saved);
     }
 
     @Transactional
@@ -92,6 +99,14 @@ public class DocumentService {
         requireAdmin(document.getCompany().getId(), requesterEmail);
         document.setActive(false);
         documentRepository.save(document);
+    }
+
+    public void reprocessDocument(Long documentId, String requesterEmail) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Document not found"));
+
+        requireAdmin(document.getCompany().getId(), requesterEmail);
+        documentProcessingDispatcher.dispatch(documentId);
     }
 
     private DocumentResponse toResponse(Document document) {

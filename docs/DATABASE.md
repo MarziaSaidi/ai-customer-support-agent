@@ -18,7 +18,7 @@ companies ── documents ── document_chunks (embedding vector)
 | `companies` | id, name |
 | `company_users` | user_id, company_id, role |
 | `documents` | id, company_id, filename |
-| `document_chunks` | id, document_id, content, embedding |
+| `document_chunks` | id, document_id, content, embedding | ✅ Day 5 |
 | `conversations` | id, company_id, customer_email |
 | `messages` | id, conversation_id, role, content |
 | `tickets` | id, conversation_id, status, priority |
@@ -28,7 +28,7 @@ companies ── documents ── document_chunks (embedding vector)
 | Target | Current code | Migration |
 |--------|--------------|-----------|
 | `company_users` | `users.company_id` + `users.role` | **Day 3** — add join table |
-| `document_chunks` | `ai_embeddings` | **Day 5** — rename entity/table |
+| `document_chunks` | `ai_embeddings` | ✅ **Day 5** — renamed |
 | `conversations` | `chat_sessions` | **Day 8** — rename entity/table |
 | `documents.filename` | `documents.title` + `file_url` | **Day 4** — align fields |
 

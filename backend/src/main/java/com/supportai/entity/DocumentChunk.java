@@ -10,21 +10,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "ai_embeddings")
+@Table(name = "document_chunks")
 @Getter
 @Setter
-public class AIEmbedding extends BaseEntity {
+public class DocumentChunk extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id", nullable = false)
     private Document document;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String chunkText;
+    private String content;
 
     @Column(nullable = false)
     private int chunkIndex;
 
-    @Column(columnDefinition = "vector(1536)")
+    @Column(columnDefinition = "REAL array")
     private float[] embedding;
 }

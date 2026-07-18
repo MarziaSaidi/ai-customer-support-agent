@@ -13,9 +13,9 @@ Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 | 1 | Project setup | ✅ Done | — |
 | 2 | Authentication | ✅ Done | [x] Marzia |
 | 3 | Company dashboard | ✅ Done | [x] Marzia |
-| 4 | Document upload | ✅ Done | [ ] Marzia test |
-| 5 | Document processing pipeline | ⚪ Next | |
-| 6 | Vector search (pgvector) | ⚪ Pending | |
+| 4 | Document upload | ✅ Done | [x] Marzia |
+| 5 | Document processing pipeline | ✅ Done | |
+| 6 | Vector search (pgvector) | ⚪ Next | |
 | 7 | Connect AI (RAG) | ⚪ Pending | |
 | 8 | Chat interface | ⚪ Pending | |
 | 9 | AI function calling | ⚪ Pending | |
@@ -93,13 +93,29 @@ Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 
 ---
 
-## Day 5 — Document processing pipeline
+## Day 5 — Document processing pipeline ✅
 
 **Build:**
 ```
 PDF → Text extraction → Chunking → Embeddings
 ```
-Use RabbitMQ for async jobs. Rename `ai_embeddings` → `document_chunks` per target schema.
+Use RabbitMQ for async jobs. Renamed `ai_embeddings` → `document_chunks`.
+
+### Me (AI)
+- [x] `DocumentChunk` entity (replaces `ai_embeddings`)
+- [x] Text extraction (PDF via PDFBox, Markdown/TXT plain read)
+- [x] Text chunking service (~800 chars with overlap)
+- [x] OpenAI embedding service (stub fallback when no API key)
+- [x] `DocumentProcessingService` orchestrator
+- [x] RabbitMQ async dispatch + sync fallback for dev/test
+- [x] Auto-process on upload; `POST /documents/{id}/reprocess`
+- [x] Frontend polls until status changes to Processed
+- [x] Pipeline tests
+
+### You (Marzia)
+- [ ] Restart backend, upload `samples/return-policy.pdf`
+- [ ] Wait a few seconds — status should change from Pending → Processed
+- [ ] Re-upload `samples/shipping-faq.txt` and confirm same behavior
 
 ---
 

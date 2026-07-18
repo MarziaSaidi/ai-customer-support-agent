@@ -22,3 +22,5 @@ app:
     expiration-ms: 3600000
   cors:
     allowed-origins: http://localhost:3000
+  document-processing:
+    mode: sync

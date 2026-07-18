@@ -105,7 +105,7 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 | POST | `/documents` | JWT Admin | ✅ | Upload document (multipart) |
 | GET | `/documents/{id}` | JWT | 🔲 | Get document metadata |
 | DELETE | `/documents/{id}` | JWT Admin | ✅ | Soft-delete document |
-| POST | `/documents/{id}/reprocess` | JWT Admin | 🔲 | Re-queue processing job |
+| POST | `/documents/{id}/reprocess` | JWT Admin | ✅ | Re-queue processing job |
 
 ### POST `/documents`
 

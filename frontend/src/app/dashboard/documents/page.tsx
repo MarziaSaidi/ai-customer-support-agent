@@ -23,6 +23,18 @@ export default function DocumentsPage() {
     api.getDocuments(user.companyId).then(setDocuments).catch(console.error);
   }, [user?.companyId]);
 
+  const hasPending = documents.some((doc) => !doc.processed);
+
+  useEffect(() => {
+    if (!user?.companyId || !hasPending) return;
+
+    const interval = setInterval(() => {
+      api.getDocuments(user.companyId!).then(setDocuments).catch(console.error);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [user?.companyId, hasPending]);
+
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault();
     if (!user?.companyId || !file || !isAdmin) return;

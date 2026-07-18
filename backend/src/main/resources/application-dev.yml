@@ -18,6 +18,9 @@ spring:
     hibernate:
       ddl-auto: create-drop
     database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
 
   h2:
     console:
@@ -27,3 +30,9 @@ spring:
 logging:
   level:
     com.supportai: INFO
+
+app:
+  storage:
+    local-path: ../uploads
+  document-processing:
+    mode: sync

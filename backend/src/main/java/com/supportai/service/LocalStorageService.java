@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,10 +19,10 @@ public class LocalStorageService {
 
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("pdf", "md", "markdown", "txt", "doc", "docx");
 
-    private final StorageProperties storageProperties;
+    private final Path storageRoot;
 
     public LocalStorageService(StorageProperties storageProperties) {
-        this.storageProperties = storageProperties;
+        this.storageRoot = Paths.get(storageProperties.getLocalPath()).toAbsolutePath().normalize();
     }
 
     public String store(Long companyId, MultipartFile file) {
@@ -36,12 +38,17 @@ public class LocalStorageService {
         }
 
         String storedName = UUID.randomUUID() + "-" + originalFilename;
-        Path directory = Paths.get(storageProperties.getLocalPath(), String.valueOf(companyId));
+        Path directory = storageRoot.resolve(String.valueOf(companyId));
 
         try {
             Files.createDirectories(directory);
-            Path target = directory.resolve(storedName);
-            file.transferTo(target.toFile());
+            Path target = directory.resolve(storedName).normalize();
+            if (!target.startsWith(storageRoot)) {
+                throw new BadRequestException("Invalid file path");
+            }
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, target, StandardCopyOption.REPLACE_EXISTING);
+            }
             return Paths.get(String.valueOf(companyId), storedName).toString().replace("\\", "/");
         } catch (IOException ex) {
             throw new BadRequestException("Failed to store file");
@@ -61,5 +68,19 @@ public class LocalStorageService {
             throw new BadRequestException("File must have an extension");
         }
         return filename.substring(dot + 1).toLowerCase();
+    }
+
+    public Path resolveStoredPath(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) {
+            throw new BadRequestException("Invalid file path");
+        }
+        Path resolved = storageRoot.resolve(relativePath).normalize();
+        if (!resolved.startsWith(storageRoot)) {
+            throw new BadRequestException("Invalid file path");
+        }
+        if (!Files.exists(resolved)) {
+            throw new BadRequestException("Stored file not found");
+        }
+        return resolved;
     }
 }

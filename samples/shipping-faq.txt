@@ -1,0 +1,19 @@
+SHIPPING FAQ — Example Store
+
+Q: How long does shipping take?
+A: Standard shipping takes 3–5 business days. Express shipping takes 1–2 business days.
+
+Q: Do you ship internationally?
+A: Yes. International orders typically arrive in 7–14 business days. Duties may apply.
+
+Q: How can I track my order?
+A: When your order ships, we email a tracking number. You can also view status in your account under Orders.
+
+Q: What if my package is lost or damaged?
+A: Contact support within 14 days of the estimated delivery date. We will replace the item or issue a refund.
+
+Q: Can I change my shipping address after ordering?
+A: You can update the address within 2 hours of placing the order. After that, contact support immediately — we will try to help before the package ships.
+
+Q: Is free shipping available?
+A: Free standard shipping on orders over $75 within the continental United States.

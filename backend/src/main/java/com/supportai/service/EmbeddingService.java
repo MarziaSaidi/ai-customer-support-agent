@@ -1,0 +1,94 @@
+package com.supportai.service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class EmbeddingService {
+
+    private static final Logger log = LoggerFactory.getLogger(EmbeddingService.class);
+    private static final int EMBEDDING_DIMENSION = 1536;
+
+    private final RestClient restClient;
+    private final ObjectMapper objectMapper;
+    private final String apiKey;
+    private final String model;
+
+    public EmbeddingService(
+            ObjectMapper objectMapper,
+            @Value("${app.openai.api-key:}") String apiKey,
+            @Value("${app.openai.embedding-model:text-embedding-3-small}") String model
+    ) {
+        this.objectMapper = objectMapper;
+        this.apiKey = apiKey;
+        this.model = model;
+        this.restClient = RestClient.create("https://api.openai.com");
+    }
+
+    public float[] embed(String text) {
+        if (text == null || text.isBlank()) {
+            return zeroVector();
+        }
+
+        if (apiKey == null || apiKey.isBlank()) {
+            return stubEmbedding(text);
+        }
+
+        try {
+            Map<String, Object> body = Map.of(
+                    "model", model,
+                    "input", text
+            );
+
+            ResponseEntity<String> response = restClient.post()
+                    .uri("/v1/embeddings")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .toEntity(String.class);
+
+            JsonNode root = objectMapper.readTree(response.getBody());
+            JsonNode embeddingNode = root.path("data").path(0).path("embedding");
+            return toFloatArray(embeddingNode);
+        } catch (Exception ex) {
+            log.warn("OpenAI embedding failed, using stub embedding: {}", ex.getMessage());
+            return stubEmbedding(text);
+        }
+    }
+
+    private float[] toFloatArray(JsonNode embeddingNode) {
+        List<Float> values = new ArrayList<>();
+        embeddingNode.forEach(node -> values.add((float) node.asDouble()));
+        float[] result = new float[values.size()];
+        for (int i = 0; i < values.size(); i++) {
+            result[i] = values.get(i);
+        }
+        return result;
+    }
+
+    private float[] stubEmbedding(String text) {
+        float[] vector = new float[EMBEDDING_DIMENSION];
+        int hash = text.hashCode();
+        for (int i = 0; i < EMBEDDING_DIMENSION; i++) {
+            vector[i] = ((hash + i * 31) % 1000) / 1000.0f;
+        }
+        return vector;
+    }
+
+    private float[] zeroVector() {
+        return new float[EMBEDDING_DIMENSION];
+    }
+}

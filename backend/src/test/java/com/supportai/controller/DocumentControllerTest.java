@@ -55,21 +55,21 @@ class DocumentControllerTest {
 
         MockMultipartFile file = new MockMultipartFile(
                 "file",
-                "return-policy.pdf",
-                "application/pdf",
-                "Sample PDF content for testing".getBytes()
+                "return-policy.txt",
+                "text/plain",
+                "Returns accepted within 60 days if unused with tags.".getBytes()
         );
 
         mockMvc.perform(multipart("/api/documents")
                         .file(file)
                         .param("companyId", companyId.toString())
                         .param("title", "Return Policy")
-                        .param("type", DocumentType.PDF.name())
+                        .param("type", DocumentType.FAQ.name())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title").value("Return Policy"))
-                .andExpect(jsonPath("$.filename").value("return-policy.pdf"))
-                .andExpect(jsonPath("$.processed").value(false));
+                .andExpect(jsonPath("$.filename").value("return-policy.txt"))
+                .andExpect(jsonPath("$.processed").value(true));
 
         mockMvc.perform(get("/api/documents")
                         .param("companyId", companyId.toString())
