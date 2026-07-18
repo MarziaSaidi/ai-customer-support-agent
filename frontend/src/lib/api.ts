@@ -75,6 +75,15 @@ export interface DocumentItem {
   createdAt: string;
 }
 
+export interface DocumentChunkMatch {
+  chunkId: number;
+  documentId: number;
+  documentTitle: string;
+  content: string;
+  chunkIndex: number;
+  score: number;
+}
+
 export class ApiError extends Error {
   status: number;
   errors?: Record<string, string>;
@@ -187,6 +196,12 @@ export const api = {
 
   deleteDocument: (documentId: number) =>
     request<void>(`/documents/${documentId}`, { method: "DELETE" }),
+
+  searchDocuments: (companyId: number, query: string, limit = 5) =>
+    request<DocumentChunkMatch[]>("/documents/search", {
+      method: "POST",
+      body: JSON.stringify({ companyId, query, limit }),
+    }),
 
   getAnalytics: (companyId: number) =>
     request<AnalyticsResponse>(`/analytics?companyId=${companyId}`),

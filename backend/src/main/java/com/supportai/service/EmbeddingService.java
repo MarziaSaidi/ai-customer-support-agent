@@ -69,6 +69,18 @@ public class EmbeddingService {
         }
     }
 
+    public String toPgVectorLiteral(float[] vector) {
+        StringBuilder builder = new StringBuilder("[");
+        for (int i = 0; i < vector.length; i++) {
+            if (i > 0) {
+                builder.append(',');
+            }
+            builder.append(vector[i]);
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
     private float[] toFloatArray(JsonNode embeddingNode) {
         List<Float> values = new ArrayList<>();
         embeddingNode.forEach(node -> values.add((float) node.asDouble()));
@@ -81,9 +93,26 @@ public class EmbeddingService {
 
     private float[] stubEmbedding(String text) {
         float[] vector = new float[EMBEDDING_DIMENSION];
-        int hash = text.hashCode();
-        for (int i = 0; i < EMBEDDING_DIMENSION; i++) {
-            vector[i] = ((hash + i * 31) % 1000) / 1000.0f;
+        String[] words = text.toLowerCase().split("\\W+");
+        for (String word : words) {
+            if (word.isBlank() || word.length() < 3) {
+                continue;
+            }
+            int bucket = Math.floorMod(word.hashCode(), EMBEDDING_DIMENSION);
+            vector[bucket] += 1.0f;
+        }
+
+        double norm = 0.0;
+        for (float value : vector) {
+            norm += value * value;
+        }
+        if (norm == 0.0) {
+            return vector;
+        }
+
+        float scale = (float) (1.0 / Math.sqrt(norm));
+        for (int i = 0; i < vector.length; i++) {
+            vector[i] *= scale;
         }
         return vector;
     }

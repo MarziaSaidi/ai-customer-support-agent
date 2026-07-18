@@ -36,3 +36,5 @@ app:
     local-path: ../uploads
   document-processing:
     mode: sync
+  vector-search:
+    mode: in-memory

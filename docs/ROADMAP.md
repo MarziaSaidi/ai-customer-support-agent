@@ -15,8 +15,8 @@ Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 | 3 | Company dashboard | ✅ Done | [x] Marzia |
 | 4 | Document upload | ✅ Done | [x] Marzia |
 | 5 | Document processing pipeline | ✅ Done | |
-| 6 | Vector search (pgvector) | ⚪ Next | |
-| 7 | Connect AI (RAG) | ⚪ Pending | |
+| 6 | Vector search (pgvector) | ✅ Done | |
+| 7 | Connect AI (RAG) | ⚪ Next | |
 | 8 | Chat interface | ⚪ Pending | |
 | 9 | AI function calling | ⚪ Pending | |
 | 10 | Ticket system | ⚪ Pending | |
@@ -119,11 +119,23 @@ Use RabbitMQ for async jobs. Renamed `ai_embeddings` → `document_chunks`.
 
 ---
 
-## Day 6 — Vector search
+## Day 6 — Vector search ✅
 
-**Build:** pgvector similarity search
+**Build:** pgvector similarity search with in-memory fallback for dev
 
-**Test:** Question *"How do refunds work?"* → finds refund policy chunk
+**Test:** Question *"How do refunds work?"* → finds return policy chunk
+
+### Me (AI)
+- [x] `VectorSearchService` with pgvector + in-memory cosine search
+- [x] `POST /api/documents/search` endpoint
+- [x] Improved stub embeddings for local dev without OpenAI key
+- [x] Knowledge search test UI on documents page
+- [x] Vector search tests
+
+### You (Marzia)
+- [ ] Upload and process a return policy document
+- [ ] Search "How do refunds work?" on the documents page
+- [ ] Confirm the return policy chunk appears in results
 
 ---
 

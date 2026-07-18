@@ -24,3 +24,5 @@ app:
     allowed-origins: http://localhost:3000
   document-processing:
     mode: sync
+  vector-search:
+    mode: in-memory

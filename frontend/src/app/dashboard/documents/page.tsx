@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
-import { api, type DocumentItem, ApiError } from "@/lib/api";
+import { api, type DocumentItem, type DocumentChunkMatch, ApiError } from "@/lib/api";
 
 export default function DocumentsPage() {
   const { user } = useAuth();
@@ -16,6 +16,9 @@ export default function DocumentsPage() {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<DocumentChunkMatch[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const isAdmin = user?.role === "ADMIN";
 
   useEffect(() => {
@@ -65,6 +68,23 @@ export default function DocumentsPage() {
     }
   }
 
+  async function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user?.companyId || !searchQuery.trim()) return;
+
+    setSearchLoading(true);
+    setError("");
+    try {
+      const results = await api.searchDocuments(user.companyId, searchQuery.trim());
+      setSearchResults(results);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Search failed");
+      setSearchResults([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }
+
   return (
     <>
       <h1 className="text-2xl font-bold">Knowledge Base</h1>
@@ -108,6 +128,41 @@ export default function DocumentsPage() {
           </CardContent>
         </Card>
       )}
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Test knowledge search</CardTitle>
+          <CardDescription>
+            Search processed documents to preview what the AI will retrieve.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="How do refunds work?"
+              required
+            />
+            <Button type="submit" disabled={searchLoading}>
+              {searchLoading ? "Searching..." : "Search"}
+            </Button>
+          </form>
+          {searchResults.length > 0 && (
+            <ul className="mt-4 space-y-3">
+              {searchResults.map((result) => (
+                <li key={result.chunkId} className="rounded-lg border p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-medium">{result.documentTitle}</p>
+                    <Badge variant="outline">Score {result.score.toFixed(2)}</Badge>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{result.content}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="mt-6">
         <CardHeader>

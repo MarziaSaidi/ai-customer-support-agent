@@ -103,9 +103,37 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 |--------|------|------|--------|-------------|
 | GET | `/documents` | JWT | ✅ | List company documents |
 | POST | `/documents` | JWT Admin | ✅ | Upload document (multipart) |
+| POST | `/documents/search` | JWT | ✅ | Semantic search over document chunks |
 | GET | `/documents/{id}` | JWT | 🔲 | Get document metadata |
 | DELETE | `/documents/{id}` | JWT Admin | ✅ | Soft-delete document |
 | POST | `/documents/{id}/reprocess` | JWT Admin | ✅ | Re-queue processing job |
+
+### POST `/documents/search`
+
+**Request:**
+```json
+{
+  "companyId": 1,
+  "query": "How do refunds work?",
+  "limit": 5
+}
+```
+
+**Response (200):**
+```json
+[
+  {
+    "chunkId": 12,
+    "documentId": 3,
+    "documentTitle": "Return Policy",
+    "content": "Refunds are processed within 5-7 business days...",
+    "chunkIndex": 0,
+    "score": 0.84
+  }
+]
+```
+
+---
 
 ### POST `/documents`
 

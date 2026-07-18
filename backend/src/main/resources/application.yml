@@ -63,6 +63,8 @@ app:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
   document-processing:
     mode: ${DOCUMENT_PROCESSING_MODE:rabbit}
+  vector-search:
+    mode: ${VECTOR_SEARCH_MODE:pgvector}
 
 management:
   endpoints:

@@ -1,8 +1,12 @@
 package com.supportai.controller;
 
+import com.supportai.dto.DocumentChunkMatchResponse;
 import com.supportai.dto.DocumentResponse;
+import com.supportai.dto.DocumentSearchRequest;
 import com.supportai.enums.DocumentType;
 import com.supportai.service.DocumentService;
+import com.supportai.service.VectorSearchService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -24,9 +29,11 @@ import java.util.List;
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final VectorSearchService vectorSearchService;
 
-    public DocumentController(DocumentService documentService) {
+    public DocumentController(DocumentService documentService, VectorSearchService vectorSearchService) {
         this.documentService = documentService;
+        this.vectorSearchService = vectorSearchService;
     }
 
     @GetMapping
@@ -47,6 +54,19 @@ public class DocumentController {
             @AuthenticationPrincipal UserDetails principal
     ) {
         return documentService.uploadDocument(companyId, title, type, file, principal.getUsername());
+    }
+
+    @PostMapping("/search")
+    public List<DocumentChunkMatchResponse> searchDocuments(
+            @Valid @RequestBody DocumentSearchRequest request,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return vectorSearchService.search(
+                request.companyId(),
+                request.query(),
+                request.limit(),
+                principal.getUsername()
+        );
     }
 
     @DeleteMapping("/{id}")
