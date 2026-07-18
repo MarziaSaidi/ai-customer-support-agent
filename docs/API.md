@@ -97,6 +97,41 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 
 ---
 
+---
+
+## Knowledge / RAG
+
+| Method | Path | Auth | Status | Description |
+|--------|------|------|--------|-------------|
+| POST | `/knowledge/ask` | JWT | ✅ | Ask a question using company docs (RAG) |
+
+### POST `/knowledge/ask`
+
+**Request:**
+```json
+{
+  "companyId": 1,
+  "question": "Can I return shoes after 30 days?"
+}
+```
+
+**Response (200):**
+```json
+{
+  "answer": "Based on Return Policy, returns are accepted within 60 days if unused with tags attached.",
+  "sources": [
+    {
+      "documentId": 3,
+      "documentTitle": "Return Policy",
+      "excerpt": "Returns accepted within 60 days if unused with tags attached.",
+      "score": 0.84
+    }
+  ]
+}
+```
+
+---
+
 ## Documents (Knowledge Base)
 
 | Method | Path | Auth | Status | Description |

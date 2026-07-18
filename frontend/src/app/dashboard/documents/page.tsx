@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/auth-context";
-import { api, type DocumentItem, type DocumentChunkMatch, ApiError } from "@/lib/api";
+import { api, type DocumentItem, type DocumentChunkMatch, type RagAnswer, ApiError } from "@/lib/api";
 
 export default function DocumentsPage() {
   const { user } = useAuth();
@@ -19,6 +19,9 @@ export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<DocumentChunkMatch[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [askQuestion, setAskQuestion] = useState("");
+  const [askAnswer, setAskAnswer] = useState<RagAnswer | null>(null);
+  const [askLoading, setAskLoading] = useState(false);
   const isAdmin = user?.role === "ADMIN";
 
   useEffect(() => {
@@ -82,6 +85,23 @@ export default function DocumentsPage() {
       setSearchResults([]);
     } finally {
       setSearchLoading(false);
+    }
+  }
+
+  async function handleAsk(e: React.FormEvent) {
+    e.preventDefault();
+    if (!user?.companyId || !askQuestion.trim()) return;
+
+    setAskLoading(true);
+    setError("");
+    try {
+      const answer = await api.askKnowledge(user.companyId, askQuestion.trim());
+      setAskAnswer(answer);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Ask failed");
+      setAskAnswer(null);
+    } finally {
+      setAskLoading(false);
     }
   }
 
@@ -160,6 +180,44 @@ export default function DocumentsPage() {
                 </li>
               ))}
             </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Ask AI</CardTitle>
+          <CardDescription>
+            Preview the RAG answer customers will get from your knowledge base.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleAsk} className="flex gap-2">
+            <Input
+              value={askQuestion}
+              onChange={(e) => setAskQuestion(e.target.value)}
+              placeholder="Can I return shoes after 30 days?"
+              required
+            />
+            <Button type="submit" disabled={askLoading}>
+              {askLoading ? "Thinking..." : "Ask"}
+            </Button>
+          </form>
+          {askAnswer && (
+            <div className="mt-4 space-y-3 rounded-lg border p-4">
+              <p className="text-sm whitespace-pre-wrap">{askAnswer.answer}</p>
+              {askAnswer.sources.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Sources</p>
+                  {askAnswer.sources.map((source) => (
+                    <div key={`${source.documentId}-${source.excerpt}`} className="rounded-md bg-muted/50 p-2">
+                      <p className="text-sm font-medium">{source.documentTitle}</p>
+                      <p className="text-sm text-muted-foreground">{source.excerpt}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>

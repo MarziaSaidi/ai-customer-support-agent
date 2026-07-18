@@ -16,8 +16,8 @@ Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 | 4 | Document upload | ✅ Done | [x] Marzia |
 | 5 | Document processing pipeline | ✅ Done | |
 | 6 | Vector search (pgvector) | ✅ Done | |
-| 7 | Connect AI (RAG) | ⚪ Next | |
-| 8 | Chat interface | ⚪ Pending | |
+| 7 | Connect AI (RAG) | ✅ Done | |
+| 8 | Chat interface | ⚪ Next | |
 | 9 | AI function calling | ⚪ Pending | |
 | 10 | Ticket system | ⚪ Pending | |
 | 11 | Analytics dashboard | ⚪ Pending | |
@@ -139,12 +139,25 @@ Use RabbitMQ for async jobs. Renamed `ai_embeddings` → `document_chunks`.
 
 ---
 
-## Day 7 — Connect AI (RAG)
+## Day 7 — Connect AI (RAG) ✅
 
 **Build:**
 ```
 User question → Retrieve documents → GPT with context → Answer + source citation
 ```
+
+### Me (AI)
+- [x] `RagService` with vector retrieval + OpenAI chat completion
+- [x] Fallback answers from top chunks when no OpenAI key
+- [x] `POST /api/knowledge/ask` endpoint with source citations
+- [x] Widget chat uses RAG via updated `AiService`
+- [x] Ask AI preview UI on documents page
+- [x] RAG integration tests
+
+### You (Marzia)
+- [ ] Upload return policy, then ask "Can I return shoes after 30 days?"
+- [ ] Confirm answer references Return Policy with sources listed
+- [ ] Optional: add `OPENAI_API_KEY` to `.env` for GPT-generated answers
 
 ---
 

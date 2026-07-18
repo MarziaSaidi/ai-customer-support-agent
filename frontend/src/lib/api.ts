@@ -84,6 +84,18 @@ export interface DocumentChunkMatch {
   score: number;
 }
 
+export interface RagSource {
+  documentId: number;
+  documentTitle: string;
+  excerpt: string;
+  score: number;
+}
+
+export interface RagAnswer {
+  answer: string;
+  sources: RagSource[];
+}
+
 export class ApiError extends Error {
   status: number;
   errors?: Record<string, string>;
@@ -201,6 +213,12 @@ export const api = {
     request<DocumentChunkMatch[]>("/documents/search", {
       method: "POST",
       body: JSON.stringify({ companyId, query, limit }),
+    }),
+
+  askKnowledge: (companyId: number, question: string) =>
+    request<RagAnswer>("/knowledge/ask", {
+      method: "POST",
+      body: JSON.stringify({ companyId, question }),
     }),
 
   getAnalytics: (companyId: number) =>

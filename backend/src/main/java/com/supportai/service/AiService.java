@@ -1,12 +1,12 @@
 package com.supportai.service;
 
+import com.supportai.dto.RagAnswerResponse;
 import com.supportai.entity.ChatSession;
 import com.supportai.entity.Order;
 import com.supportai.entity.Refund;
 import com.supportai.enums.RefundStatus;
 import com.supportai.repository.OrderRepository;
 import com.supportai.repository.RefundRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
@@ -20,16 +20,16 @@ public class AiService {
 
     private final OrderRepository orderRepository;
     private final RefundRepository refundRepository;
-    private final String openAiApiKey;
+    private final RagService ragService;
 
     public AiService(
             OrderRepository orderRepository,
             RefundRepository refundRepository,
-            @Value("${app.openai.api-key:}") String openAiApiKey
+            RagService ragService
     ) {
         this.orderRepository = orderRepository;
         this.refundRepository = refundRepository;
-        this.openAiApiKey = openAiApiKey;
+        this.ragService = ragService;
     }
 
     public String generateReply(ChatSession session, String userMessage) {
@@ -39,16 +39,12 @@ public class AiService {
             return handleOrderStatus(userMessage, session.getCompany().getId());
         }
 
-        if (lowerMessage.contains("refund")) {
+        if (lowerMessage.contains("refund") && ORDER_PATTERN.matcher(userMessage).find()) {
             return handleRefundRequest(userMessage);
         }
 
-        if (openAiApiKey == null || openAiApiKey.isBlank()) {
-            return "Thanks for your message. Our AI is being configured — a support agent will follow up shortly.";
-        }
-
-        // TODO: Integrate OpenAI API with RAG retrieval from pgvector embeddings
-        return "I found relevant information in our knowledge base and I'm here to help. Could you share more details?";
+        RagAnswerResponse response = ragService.answer(session.getCompany(), userMessage);
+        return ragService.formatAnswerWithSources(response);
     }
 
     private String handleOrderStatus(String message, Long companyId) {

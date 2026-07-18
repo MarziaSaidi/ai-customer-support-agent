@@ -46,7 +46,10 @@ public class VectorSearchService {
             String requesterEmail
     ) {
         requireMembership(companyId, requesterEmail);
+        return searchForCompany(companyId, query, limit);
+    }
 
+    public List<DocumentChunkMatchResponse> searchForCompany(Long companyId, String query, Integer limit) {
         int resultLimit = limit != null && limit > 0 ? Math.min(limit, 20) : DEFAULT_LIMIT;
         float[] queryEmbedding = embeddingService.embed(query);
 
