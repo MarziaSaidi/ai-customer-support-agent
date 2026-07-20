@@ -17,8 +17,8 @@ Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 | 5 | Document processing pipeline | ✅ Done | |
 | 6 | Vector search (pgvector) | ✅ Done | |
 | 7 | Connect AI (RAG) | ✅ Done | |
-| 8 | Chat interface | ⚪ Next | |
-| 9 | AI function calling | ⚪ Pending | |
+| 8 | Chat interface | ✅ Done | |
+| 9 | AI function calling | ✅ Done | |
 | 10 | Ticket system | ⚪ Pending | |
 | 11 | Analytics dashboard | ⚪ Pending | |
 | 12 | Testing | ⚪ Pending | |
@@ -185,6 +185,18 @@ User question → Retrieve documents → GPT with context → Answer + source ci
 - `checkOrderStatus()`
 - `createTicket()`
 - `cancelRequest()` / `searchDocumentation()`
+
+- [x] `AiFunctionService` with order, ticket, cancel, refund, and doc search actions
+- [x] OpenAI tool definitions and multi-step tool calling in `OpenAiChatService`
+- [x] Keyword-based fallback router when no OpenAI key is configured
+- [x] Demo order `#48291` seeded on company registration
+- [x] Function calling integration tests
+
+### You (Marzia)
+- [ ] Restart backend, register or log in, open `/widget`
+- [ ] Ask "Where is my order #48291?" — confirm shipped status + tracking
+- [ ] Ask "What is your return policy?" after uploading docs — confirm doc search answer
+- [ ] Ask "I need to speak to a human agent" — confirm ticket is created
 
 ---
 

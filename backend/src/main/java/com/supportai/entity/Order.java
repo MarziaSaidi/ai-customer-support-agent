@@ -9,6 +9,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,7 +17,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
-@Table(name = "orders")
+@Table(
+        name = "orders",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"company_id", "order_number"})
+)
 @Getter
 @Setter
 public class Order extends BaseEntity {
@@ -25,7 +29,7 @@ public class Order extends BaseEntity {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String orderNumber;
 
     @Column(nullable = false)

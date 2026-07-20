@@ -1,12 +1,10 @@
 package com.supportai.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.supportai.ai.AiToolDefinitions;
 import com.supportai.dto.RagAnswerResponse;
+import com.supportai.entity.Company;
 import com.supportai.entity.Conversation;
-import com.supportai.entity.Order;
-import com.supportai.entity.Refund;
-import com.supportai.enums.RefundStatus;
-import com.supportai.repository.OrderRepository;
-import com.supportai.repository.RefundRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
@@ -18,78 +16,167 @@ public class AiService {
 
     private static final Pattern ORDER_PATTERN = Pattern.compile("#?(\\d{4,})");
 
-    private final OrderRepository orderRepository;
-    private final RefundRepository refundRepository;
+    private final AiFunctionService aiFunctionService;
+    private final OpenAiChatService openAiChatService;
     private final RagService ragService;
 
     public AiService(
-            OrderRepository orderRepository,
-            RefundRepository refundRepository,
+            AiFunctionService aiFunctionService,
+            OpenAiChatService openAiChatService,
             RagService ragService
     ) {
-        this.orderRepository = orderRepository;
-        this.refundRepository = refundRepository;
+        this.aiFunctionService = aiFunctionService;
+        this.openAiChatService = openAiChatService;
         this.ragService = ragService;
     }
 
     public String generateReply(Conversation conversation, String userMessage) {
+        Company company = conversation.getCompany();
+        Long companyId = company.getId();
+        Long conversationId = conversation.getId();
+        String customerEmail = conversation.getCustomerEmail();
+
+        if (openAiChatService.isConfigured()) {
+            String toolAnswer = openAiChatService.chatWithTools(
+                    buildFunctionCallingSystemPrompt(company),
+                    userMessage,
+                    AiToolDefinitions.all(),
+                    (functionName, arguments) -> executeTool(
+                            functionName,
+                            arguments,
+                            company,
+                            companyId,
+                            conversationId,
+                            customerEmail
+                    )
+            );
+            if (toolAnswer != null && !toolAnswer.isBlank()) {
+                return toolAnswer;
+            }
+        }
+
+        return generateFallbackReply(conversation, userMessage);
+    }
+
+    private String executeTool(
+            String functionName,
+            JsonNode arguments,
+            Company company,
+            Long companyId,
+            Long conversationId,
+            String customerEmail
+    ) {
+        return switch (functionName) {
+            case "checkOrderStatus" -> aiFunctionService.checkOrderStatus(
+                    textArg(arguments, "orderNumber"),
+                    companyId
+            );
+            case "createTicket" -> aiFunctionService.createTicket(
+                    textArg(arguments, "subject"),
+                    textArg(arguments, "description"),
+                    companyId,
+                    conversationId,
+                    customerEmail,
+                    textArg(arguments, "priority")
+            );
+            case "cancelOrder" -> aiFunctionService.cancelOrder(
+                    textArg(arguments, "orderNumber"),
+                    companyId
+            );
+            case "requestRefund" -> aiFunctionService.requestRefund(
+                    textArg(arguments, "orderNumber"),
+                    companyId
+            );
+            case "searchDocumentation" -> aiFunctionService.searchDocumentation(
+                    company,
+                    textArg(arguments, "query")
+            );
+            default -> "Unknown function: " + functionName;
+        };
+    }
+
+    private String generateFallbackReply(Conversation conversation, String userMessage) {
+        Company company = conversation.getCompany();
+        Long companyId = company.getId();
         String lowerMessage = userMessage.toLowerCase(Locale.ROOT);
 
-        if (lowerMessage.contains("order") && (lowerMessage.contains("where") || lowerMessage.contains("status"))) {
-            return handleOrderStatus(userMessage, conversation.getCompany().getId());
+        if (containsOrderStatusIntent(lowerMessage)) {
+            return aiFunctionService.checkOrderStatus(extractOrderNumber(userMessage), companyId);
+        }
+
+        if (lowerMessage.contains("cancel") && ORDER_PATTERN.matcher(userMessage).find()) {
+            return aiFunctionService.cancelOrder(extractOrderNumber(userMessage), companyId);
         }
 
         if (lowerMessage.contains("refund") && ORDER_PATTERN.matcher(userMessage).find()) {
-            return handleRefundRequest(userMessage);
+            return aiFunctionService.requestRefund(extractOrderNumber(userMessage), companyId);
         }
 
-        RagAnswerResponse response = ragService.answer(conversation.getCompany(), userMessage);
+        if (containsTicketIntent(lowerMessage)) {
+            return aiFunctionService.createTicket(
+                    "Customer support request",
+                    userMessage,
+                    companyId,
+                    conversation.getId(),
+                    conversation.getCustomerEmail(),
+                    "MEDIUM"
+            );
+        }
+
+        RagAnswerResponse response = ragService.answer(company, userMessage);
+        if (response.sources().isEmpty() && containsHelpIntent(lowerMessage)) {
+            return aiFunctionService.createTicket(
+                    "Escalation from chat",
+                    userMessage,
+                    companyId,
+                    conversation.getId(),
+                    conversation.getCustomerEmail(),
+                    "HIGH"
+            );
+        }
+
         return ragService.formatAnswerWithSources(response);
     }
 
-    private String handleOrderStatus(String message, Long companyId) {
-        Matcher matcher = ORDER_PATTERN.matcher(message);
-        if (!matcher.find()) {
-            return "I can check your order status. Please provide your order number (e.g. #48291).";
-        }
+    private String buildFunctionCallingSystemPrompt(Company company) {
+        String basePrompt = company.getAiSystemPrompt() != null && !company.getAiSystemPrompt().isBlank()
+                ? company.getAiSystemPrompt()
+                : "You are a helpful customer support agent.";
 
-        String orderNumber = matcher.group(1);
-        return orderRepository.findByOrderNumberAndCompanyId(orderNumber, companyId)
-                .map(this::formatOrderStatus)
-                .orElse("I couldn't find order #" + orderNumber + ". Please double-check the number.");
+        return basePrompt + """
+
+                You can use tools to check order status, search company documentation, create support tickets,
+                cancel orders, or request refunds.
+                Use searchDocumentation for policy or FAQ questions.
+                Use createTicket when the customer needs a human agent or the issue cannot be resolved automatically.
+                Be concise, friendly, and accurate.
+                """;
     }
 
-    private String formatOrderStatus(Order order) {
-        StringBuilder response = new StringBuilder("Your order #" + order.getOrderNumber() + " is ");
-        response.append(order.getStatus().name().toLowerCase().replace('_', ' '));
-
-        if (order.getTrackingNumber() != null) {
-            response.append(". Tracking: ").append(order.getTrackingNumber());
-        }
-        if (order.getExpectedDeliveryAt() != null) {
-            response.append(". Expected delivery: ").append(order.getExpectedDeliveryAt());
-        }
-        return response.append(".").toString();
+    private boolean containsOrderStatusIntent(String lowerMessage) {
+        return lowerMessage.contains("order")
+                && (lowerMessage.contains("where") || lowerMessage.contains("status") || lowerMessage.contains("track"));
     }
 
-    private String handleRefundRequest(String message) {
-        Matcher matcher = ORDER_PATTERN.matcher(message);
-        if (!matcher.find()) {
-            return "I can help with that. Please provide your order number so I can submit the refund request.";
-        }
+    private boolean containsTicketIntent(String lowerMessage) {
+        return lowerMessage.contains("ticket")
+                || lowerMessage.contains("human")
+                || lowerMessage.contains("agent")
+                || lowerMessage.contains("speak to someone")
+                || lowerMessage.contains("talk to someone");
+    }
 
-        String orderNumber = matcher.group(1);
-        return orderRepository.findByOrderNumber(orderNumber)
-                .map(order -> {
-                    Refund refund = new Refund();
-                    refund.setOrder(order);
-                    refund.setAmount(order.getTotalAmount());
-                    refund.setReason("Customer requested refund via chat");
-                    refund.setStatus(RefundStatus.REQUESTED);
-                    refundRepository.save(refund);
-                    return "I can help with that. Your refund for order #" + orderNumber
-                            + " has been submitted and will be processed within 5 to 7 business days.";
-                })
-                .orElse("I couldn't find order #" + orderNumber + " to process a refund.");
+    private boolean containsHelpIntent(String lowerMessage) {
+        return lowerMessage.contains("help") || lowerMessage.contains("escalate");
+    }
+
+    private String extractOrderNumber(String message) {
+        Matcher matcher = ORDER_PATTERN.matcher(message);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    private String textArg(JsonNode arguments, String field) {
+        JsonNode node = arguments.path(field);
+        return node.isMissingNode() || node.isNull() ? "" : node.asText();
     }
 }

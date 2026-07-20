@@ -262,6 +262,8 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 
 ## Orders & Refunds (AI Actions)
 
+These actions are invoked by the AI via function calling (Day 9). Direct REST endpoints remain planned.
+
 | Method | Path | Auth | Status | Description |
 |--------|------|------|--------|-------------|
 | GET | `/orders` | JWT | 🔲 | List orders |
@@ -269,6 +271,8 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 | PATCH | `/orders/{orderNumber}` | JWT/AI | 🔲 | Cancel or update address |
 | POST | `/orders/{orderNumber}/refunds` | JWT/AI | 🔲 | Request refund |
 | GET | `/refunds` | JWT | 🔲 | List refunds |
+
+**AI tools (via chat):** ✅ `checkOrderStatus`, `createTicket`, `cancelOrder`, `requestRefund`, `searchDocumentation`
 
 ---
 

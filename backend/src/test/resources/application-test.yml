@@ -20,6 +20,8 @@ app:
   jwt:
     secret: test-secret-key-that-is-long-enough-for-hmac-sha256
     expiration-ms: 3600000
+  openai:
+    api-key: ""
   cors:
     allowed-origins: http://localhost:3000
   document-processing:

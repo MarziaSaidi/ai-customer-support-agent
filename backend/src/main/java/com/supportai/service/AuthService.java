@@ -31,6 +31,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final CompanyService companyService;
+    private final DemoDataService demoDataService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
@@ -40,6 +41,7 @@ public class AuthService {
             UserRepository userRepository,
             CompanyRepository companyRepository,
             CompanyService companyService,
+            DemoDataService demoDataService,
             PasswordEncoder passwordEncoder,
             JwtTokenProvider jwtTokenProvider,
             AuthenticationManager authenticationManager,
@@ -48,6 +50,7 @@ public class AuthService {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.companyService = companyService;
+        this.demoDataService = demoDataService;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authenticationManager = authenticationManager;
@@ -97,6 +100,7 @@ public class AuthService {
         userRepository.save(user);
 
         companyService.createMembership(user, company, RoleType.ADMIN);
+        demoDataService.seedDemoOrder(company);
 
         return issueToken(user);
     }

@@ -3,6 +3,7 @@ package com.supportai.controller;
 import com.supportai.dto.AddMemberRequest;
 import com.supportai.dto.CompanyMemberResponse;
 import com.supportai.dto.CompanyResponse;
+import com.supportai.dto.TicketResponse;
 import com.supportai.dto.UpdateCompanyRequest;
 import com.supportai.entity.Ticket;
 import com.supportai.exception.ResourceNotFoundException;
@@ -95,16 +96,18 @@ class TicketController {
     }
 
     @GetMapping
-    public List<Ticket> listTickets(@RequestParam Long companyId) {
-        return ticketRepository.findByCompanyIdOrderByCreatedAtDesc(companyId);
+    public List<TicketResponse> listTickets(@RequestParam Long companyId) {
+        return ticketRepository.findByCompanyIdOrderByCreatedAtDesc(companyId).stream()
+                .map(TicketResponse::from)
+                .toList();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Ticket createTicket(@RequestBody Ticket ticket, @RequestParam Long companyId) {
+    public TicketResponse createTicket(@RequestBody Ticket ticket, @RequestParam Long companyId) {
         var company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
         ticket.setCompany(company);
-        return ticketRepository.save(ticket);
+        return TicketResponse.from(ticketRepository.save(ticket));
     }
 }
