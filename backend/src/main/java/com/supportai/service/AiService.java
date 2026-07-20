@@ -1,7 +1,7 @@
 package com.supportai.service;
 
 import com.supportai.dto.RagAnswerResponse;
-import com.supportai.entity.ChatSession;
+import com.supportai.entity.Conversation;
 import com.supportai.entity.Order;
 import com.supportai.entity.Refund;
 import com.supportai.enums.RefundStatus;
@@ -32,18 +32,18 @@ public class AiService {
         this.ragService = ragService;
     }
 
-    public String generateReply(ChatSession session, String userMessage) {
+    public String generateReply(Conversation conversation, String userMessage) {
         String lowerMessage = userMessage.toLowerCase(Locale.ROOT);
 
         if (lowerMessage.contains("order") && (lowerMessage.contains("where") || lowerMessage.contains("status"))) {
-            return handleOrderStatus(userMessage, session.getCompany().getId());
+            return handleOrderStatus(userMessage, conversation.getCompany().getId());
         }
 
         if (lowerMessage.contains("refund") && ORDER_PATTERN.matcher(userMessage).find()) {
             return handleRefundRequest(userMessage);
         }
 
-        RagAnswerResponse response = ragService.answer(session.getCompany(), userMessage);
+        RagAnswerResponse response = ragService.answer(conversation.getCompany(), userMessage);
         return ragService.formatAnswerWithSources(response);
     }
 
