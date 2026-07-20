@@ -2,9 +2,12 @@ package com.supportai.controller;
 
 import com.supportai.dto.ChatMessageRequest;
 import com.supportai.dto.ChatSessionResponse;
+import com.supportai.dto.ConversationSummaryResponse;
 import com.supportai.service.ChatService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,21 +39,50 @@ public class ChatController {
         return chatService.startSession(companyId, customerEmail, customerName);
     }
 
-    @PostMapping("/widget/sessions/{sessionId}/messages")
+    @PostMapping("/widget/sessions/{conversationId}/messages")
     public ChatSessionResponse sendWidgetMessage(
-            @PathVariable Long sessionId,
+            @PathVariable Long conversationId,
             @Valid @RequestBody ChatMessageRequest request
     ) {
-        return chatService.sendMessage(sessionId, request);
+        return chatService.sendCustomerMessage(conversationId, request);
     }
 
     @GetMapping("/sessions")
-    public List<ChatSessionResponse> getSessions(@RequestParam Long companyId) {
-        return chatService.getCompanySessions(companyId);
+    public List<ConversationSummaryResponse> getSessions(
+            @RequestParam Long companyId,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return chatService.getCompanyConversations(companyId, principal.getUsername());
     }
 
-    @PostMapping("/sessions/{sessionId}/escalate")
-    public ChatSessionResponse escalate(@PathVariable Long sessionId) {
-        return chatService.escalateToAgent(sessionId);
+    @GetMapping("/sessions/{conversationId}")
+    public ChatSessionResponse getSession(
+            @PathVariable Long conversationId,
+            @RequestParam Long companyId,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return chatService.getConversation(conversationId, companyId, principal.getUsername());
+    }
+
+    @PostMapping("/sessions/{conversationId}/messages")
+    public ChatSessionResponse sendAgentMessage(
+            @PathVariable Long conversationId,
+            @Valid @RequestBody ChatMessageRequest request,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return chatService.sendAgentMessage(conversationId, request, principal.getUsername());
+    }
+
+    @PostMapping("/sessions/{conversationId}/escalate")
+    public ChatSessionResponse escalate(@PathVariable Long conversationId) {
+        return chatService.escalateToAgent(conversationId);
+    }
+
+    @PostMapping("/sessions/{conversationId}/resolve")
+    public ChatSessionResponse resolve(
+            @PathVariable Long conversationId,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return chatService.resolveConversation(conversationId, principal.getUsername());
     }
 }
