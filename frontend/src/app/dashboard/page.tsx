@@ -68,6 +68,11 @@ export default function DashboardPage() {
             <CardDescription>Manage your support platform</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
+            <Link href="/dashboard/tickets">
+              <Button variant="outline" className="w-full justify-start">
+                View support tickets
+              </Button>
+            </Link>
             <Link href="/widget">
               <Button variant="outline" className="w-full justify-start">
                 Preview chat widget
