@@ -29,7 +29,7 @@ companies ── documents ── document_chunks (embedding vector)
 |--------|--------------|-----------|
 | `company_users` | `users.company_id` + `users.role` | **Day 3** — add join table |
 | `document_chunks` | `ai_embeddings` | ✅ **Day 5** — renamed |
-| `conversations` | `chat_sessions` | **Day 8** — rename entity/table |
+| `conversations` | `conversations` | ✅ **Day 8** — renamed |
 | `documents.filename` | `documents.title` + `file_url` | **Day 4** — align fields |
 
 Extra tables in current code (kept for full spec): `orders`, `refunds`, `notifications`, `feedback`.
@@ -41,7 +41,7 @@ Extra tables in current code (kept for full spec): `orders`, `refunds`, `notific
 ```
 companies ──┬── users
             ├── documents ── ai_embeddings
-            ├── chat_sessions ── messages
+            ├── conversations ── messages
             │                 └── feedback
             ├── tickets
             └── orders ── refunds
@@ -110,7 +110,7 @@ users ── notifications
 
 **Index (planned):** `CREATE INDEX ON ai_embeddings USING ivfflat (embedding vector_cosine_ops);`
 
-### `chat_sessions`
+### `conversations`
 
 | Column | Type | Notes |
 |--------|------|-------|
@@ -129,7 +129,7 @@ users ── notifications
 | Column | Type | Notes |
 |--------|------|-------|
 | id | BIGINT PK | |
-| session_id | BIGINT FK NOT NULL | |
+| conversation_id | BIGINT FK NOT NULL | |
 | role | ENUM | `CUSTOMER`, `AI`, `AGENT`, `SYSTEM` |
 | content | TEXT NOT NULL | |
 | metadata | VARCHAR | JSON for actions/sources |
@@ -142,7 +142,7 @@ users ── notifications
 |--------|------|-------|
 | id | BIGINT PK | |
 | company_id | BIGINT FK NOT NULL | |
-| session_id | BIGINT FK | Linked chat session |
+| conversation_id | BIGINT FK | Linked conversation |
 | subject | VARCHAR NOT NULL | |
 | description | TEXT | |
 | status | ENUM | `OPEN`, `IN_PROGRESS`, `RESOLVED`, `CLOSED` |
@@ -201,7 +201,7 @@ users ── notifications
 | Column | Type | Notes |
 |--------|------|-------|
 | id | BIGINT PK | |
-| session_id | BIGINT FK NOT NULL | |
+| conversation_id | BIGINT FK NOT NULL | |
 | rating | INT NOT NULL | 1–5 |
 | comment | TEXT | |
 | resolved | BOOLEAN NOT NULL | |
