@@ -19,7 +19,7 @@ Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 | 7 | Connect AI (RAG) | ✅ Done | |
 | 8 | Chat interface | ✅ Done | |
 | 9 | AI function calling | ✅ Done | |
-| 10 | Ticket system | ⚪ Pending | |
+| 10 | Ticket system | ✅ Done | |
 | 11 | Analytics dashboard | ⚪ Pending | |
 | 12 | Testing | ⚪ Pending | |
 | 13 | Deployment | ⚪ Pending | |
@@ -203,6 +203,18 @@ User question → Retrieve documents → GPT with context → Answer + source ci
 ## Day 10 — Ticket system
 
 **Build:** Create, assign, update status, internal notes
+
+- [x] `TicketService` with company-scoped access control
+- [x] `GET /tickets/{id}`, `PATCH /tickets/{id}`, `POST /tickets/{id}/notes`
+- [x] Assign ticket to team member (auto `IN_PROGRESS`)
+- [x] Dashboard tickets page with queue + detail panel
+- [x] Ticket controller integration tests
+
+### You (Marzia)
+- [ ] Create a ticket manually from `/dashboard/tickets`
+- [ ] Assign it to yourself and change status to Resolved
+- [ ] Add an internal note and confirm it persists
+- [ ] Trigger a ticket via widget ("speak to a human agent") and find it in the queue
 
 ---
 
