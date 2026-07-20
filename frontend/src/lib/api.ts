@@ -27,6 +27,18 @@ export interface MessageResponse {
   createdAt: string;
 }
 
+export interface ConversationSummary {
+  id: number;
+  status: string;
+  customerEmail: string | null;
+  customerName: string | null;
+  resolved: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastMessagePreview: string;
+  messageCount: number;
+}
+
 export interface ChatSessionResponse {
   id: number;
   status: string;
@@ -225,7 +237,21 @@ export const api = {
     request<AnalyticsResponse>(`/analytics?companyId=${companyId}`),
 
   getSessions: (companyId: number) =>
-    request<ChatSessionResponse[]>(`/chat/sessions?companyId=${companyId}`),
+    request<ConversationSummary[]>(`/chat/sessions?companyId=${companyId}`),
+
+  getSession: (conversationId: number, companyId: number) =>
+    request<ChatSessionResponse>(`/chat/sessions/${conversationId}?companyId=${companyId}`),
+
+  sendAgentMessage: (conversationId: number, content: string) =>
+    request<ChatSessionResponse>(`/chat/sessions/${conversationId}/messages`, {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    }),
+
+  resolveSession: (conversationId: number) =>
+    request<ChatSessionResponse>(`/chat/sessions/${conversationId}/resolve`, {
+      method: "POST",
+    }),
 
   startWidgetSession: (companyId: number, customerEmail?: string, customerName?: string) => {
     const params = new URLSearchParams({ companyId: String(companyId) });
@@ -234,8 +260,8 @@ export const api = {
     return request<ChatSessionResponse>(`/chat/widget/sessions?${params}`, { method: "POST", token: null });
   },
 
-  sendWidgetMessage: (sessionId: number, content: string) =>
-    request<ChatSessionResponse>(`/chat/widget/sessions/${sessionId}/messages`, {
+  sendWidgetMessage: (conversationId: number, content: string) =>
+    request<ChatSessionResponse>(`/chat/widget/sessions/${conversationId}/messages`, {
       method: "POST",
       body: JSON.stringify({ content }),
       token: null,
