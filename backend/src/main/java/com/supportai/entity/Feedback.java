@@ -16,8 +16,8 @@ import lombok.Setter;
 public class Feedback extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "session_id", nullable = false)
-    private ChatSession session;
+    @JoinColumn(name = "conversation_id", nullable = false)
+    private Conversation conversation;
 
     @Column(nullable = false)
     private int rating;
