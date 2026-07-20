@@ -3,12 +3,7 @@ package com.supportai.controller;
 import com.supportai.dto.AddMemberRequest;
 import com.supportai.dto.CompanyMemberResponse;
 import com.supportai.dto.CompanyResponse;
-import com.supportai.dto.TicketResponse;
 import com.supportai.dto.UpdateCompanyRequest;
-import com.supportai.entity.Ticket;
-import com.supportai.exception.ResourceNotFoundException;
-import com.supportai.repository.CompanyRepository;
-import com.supportai.repository.TicketRepository;
 import com.supportai.service.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -80,34 +75,5 @@ public class CompanyController {
             @AuthenticationPrincipal UserDetails principal
     ) {
         companyService.removeMember(id, userId, principal.getUsername());
-    }
-}
-
-@RestController
-@RequestMapping("/tickets")
-class TicketController {
-
-    private final TicketRepository ticketRepository;
-    private final CompanyRepository companyRepository;
-
-    TicketController(TicketRepository ticketRepository, CompanyRepository companyRepository) {
-        this.ticketRepository = ticketRepository;
-        this.companyRepository = companyRepository;
-    }
-
-    @GetMapping
-    public List<TicketResponse> listTickets(@RequestParam Long companyId) {
-        return ticketRepository.findByCompanyIdOrderByCreatedAtDesc(companyId).stream()
-                .map(TicketResponse::from)
-                .toList();
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public TicketResponse createTicket(@RequestBody Ticket ticket, @RequestParam Long companyId) {
-        var company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
-        ticket.setCompany(company);
-        return TicketResponse.from(ticketRepository.save(ticket));
     }
 }
