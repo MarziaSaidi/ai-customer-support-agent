@@ -22,6 +22,15 @@ A multi-tenant SaaS platform that uses **Retrieval-Augmented Generation (RAG)** 
 PDF Upload → Extract → Chunk → Embeddings → Vector store → GPT answer
 ```
 
+## Testing
+
+See [docs/TESTING.md](docs/TESTING.md) for automated test commands, Postman collection, and manual checklist.
+
+```bash
+cd backend && ./mvnw test
+cd frontend && npm run lint && npm run build
+```
+
 ## Tech Stack
 
 | Layer | Technology |
