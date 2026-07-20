@@ -41,12 +41,22 @@ export default function TicketsPage() {
   }, [user?.companyId]);
 
   useEffect(() => {
-    if (!user?.companyId || selectedId == null) {
-      setSelected(null);
-      return;
-    }
-    api.getTicket(selectedId, user.companyId).then(setSelected).catch(console.error);
+    if (!user?.companyId || selectedId == null) return;
+
+    let cancelled = false;
+    api
+      .getTicket(selectedId, user.companyId)
+      .then((data) => {
+        if (!cancelled) setSelected(data);
+      })
+      .catch(console.error);
+
+    return () => {
+      cancelled = true;
+    };
   }, [user?.companyId, selectedId]);
+
+  const activeTicket = selectedId != null && selected?.id === selectedId ? selected : null;
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +85,7 @@ export default function TicketsPage() {
   }
 
   async function handleUpdate(field: "status" | "priority" | "assignedToUserId", value: string) {
-    if (!user?.companyId || !selected) return;
+    if (!user?.companyId || !activeTicket) return;
 
     setLoading(true);
     try {
@@ -86,7 +96,7 @@ export default function TicketsPage() {
             ? { status: value }
             : { priority: value };
 
-      const updated = await api.updateTicket(selected.id, user.companyId, payload);
+      const updated = await api.updateTicket(activeTicket.id, user.companyId, payload);
       setSelected(updated);
       setTickets((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
     } catch (err) {
@@ -98,11 +108,11 @@ export default function TicketsPage() {
 
   async function handleAddNote(e: React.FormEvent) {
     e.preventDefault();
-    if (!user?.companyId || !selected || !note.trim()) return;
+    if (!user?.companyId || !activeTicket || !note.trim()) return;
 
     setLoading(true);
     try {
-      const updated = await api.addTicketNote(selected.id, user.companyId, note.trim());
+      const updated = await api.addTicketNote(activeTicket.id, user.companyId, note.trim());
       setSelected(updated);
       setTickets((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
       setNote("");
@@ -219,16 +229,16 @@ export default function TicketsPage() {
         </Card>
 
         <Card className="flex h-[640px] flex-col overflow-hidden">
-          {!selected ? (
+          {!activeTicket ? (
             <CardContent className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
               Select a ticket to view details.
             </CardContent>
           ) : (
             <>
               <CardHeader className="border-b py-4">
-                <CardTitle className="text-base">{selected.subject}</CardTitle>
+                <CardTitle className="text-base">{activeTicket.subject}</CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Created {new Date(selected.createdAt).toLocaleString()}
+                  Created {new Date(activeTicket.createdAt).toLocaleString()}
                 </p>
               </CardHeader>
               <CardContent className="flex flex-1 flex-col overflow-hidden p-4">
@@ -236,16 +246,16 @@ export default function TicketsPage() {
                   <div>
                     <p className="text-xs font-medium uppercase text-muted-foreground">Description</p>
                     <p className="mt-1 text-sm whitespace-pre-wrap">
-                      {selected.description || "No description provided."}
+                      {activeTicket.description || "No description provided."}
                     </p>
                   </div>
 
-                  {selected.conversationId && (
+                  {activeTicket.conversationId && (
                     <Link
                       href="/dashboard/conversations"
                       className="text-sm text-primary hover:underline"
                     >
-                      Linked to conversation #{selected.conversationId}
+                      Linked to conversation #{activeTicket.conversationId}
                     </Link>
                   )}
 
@@ -254,7 +264,7 @@ export default function TicketsPage() {
                       <Label>Status</Label>
                       <select
                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                        value={selected.status}
+                        value={activeTicket.status}
                         onChange={(e) => handleUpdate("status", e.target.value)}
                         disabled={loading}
                       >
@@ -269,7 +279,7 @@ export default function TicketsPage() {
                       <Label>Priority</Label>
                       <select
                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                        value={selected.priority}
+                        value={activeTicket.priority}
                         onChange={(e) => handleUpdate("priority", e.target.value)}
                         disabled={loading}
                       >
@@ -284,7 +294,7 @@ export default function TicketsPage() {
                       <Label>Assignee</Label>
                       <select
                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                        value={selected.assignedToUserId ?? ""}
+                        value={activeTicket.assignedToUserId ?? ""}
                         onChange={(e) => handleUpdate("assignedToUserId", e.target.value)}
                         disabled={loading}
                       >
@@ -301,7 +311,7 @@ export default function TicketsPage() {
                   <div>
                     <p className="text-xs font-medium uppercase text-muted-foreground">Internal notes</p>
                     <pre className="mt-2 max-h-48 overflow-y-auto rounded-md bg-muted p-3 text-xs whitespace-pre-wrap">
-                      {selected.internalNotes || "No internal notes yet."}
+                      {activeTicket.internalNotes || "No internal notes yet."}
                     </pre>
                   </div>
                 </div>

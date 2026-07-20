@@ -53,20 +53,27 @@ export default function ConversationsPage() {
   }, [user?.companyId]);
 
   useEffect(() => {
-    if (!user?.companyId || selectedId == null) {
-      setConversation(null);
-      return;
-    }
+    if (!user?.companyId || selectedId == null) return;
 
+    let cancelled = false;
     api
       .getSession(selectedId, user.companyId)
-      .then(setConversation)
+      .then((data) => {
+        if (!cancelled) setConversation(data);
+      })
       .catch(console.error);
+
+    return () => {
+      cancelled = true;
+    };
   }, [user?.companyId, selectedId]);
+
+  const activeConversation =
+    selectedId != null && conversation?.id === selectedId ? conversation : null;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [conversation?.messages]);
+  }, [activeConversation?.messages]);
 
   async function refreshList() {
     if (!user?.companyId) return;
@@ -108,7 +115,10 @@ export default function ConversationsPage() {
     }
   }
 
-  const canReply = conversation && !conversation.resolved && conversation.status !== "RESOLVED";
+  const canReply =
+    activeConversation &&
+    !activeConversation.resolved &&
+    activeConversation.status !== "RESOLVED";
 
   return (
     <>
@@ -153,7 +163,7 @@ export default function ConversationsPage() {
         </Card>
 
         <Card className="flex h-[640px] flex-col overflow-hidden">
-          {!conversation ? (
+          {!activeConversation ? (
             <CardContent className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
               Select a conversation to view messages.
             </CardContent>
@@ -163,14 +173,14 @@ export default function ConversationsPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <CardTitle className="text-base">
-                      {conversation.customerName || conversation.customerEmail || `Conversation #${conversation.id}`}
+                      {activeConversation.customerName || activeConversation.customerEmail || `Conversation #${activeConversation.id}`}
                     </CardTitle>
                     <p className="text-xs text-muted-foreground">
-                      Started {new Date(conversation.createdAt).toLocaleString()}
+                      Started {new Date(activeConversation.createdAt).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={conversation.resolved ? "secondary" : "default"}>{conversation.status}</Badge>
+                    <Badge variant={activeConversation.resolved ? "secondary" : "default"}>{activeConversation.status}</Badge>
                     {canReply && (
                       <Button size="sm" variant="outline" onClick={handleResolve} disabled={actionLoading}>
                         Mark resolved
@@ -181,7 +191,7 @@ export default function ConversationsPage() {
               </CardHeader>
               <CardContent className="flex flex-1 flex-col overflow-hidden p-0">
                 <div className="flex-1 space-y-3 overflow-y-auto p-4">
-                  {conversation.messages.map((msg: MessageResponse) => (
+                  {activeConversation.messages.map((msg: MessageResponse) => (
                     <div key={msg.id} className={`flex ${messageAlignment(msg.role)}`}>
                       <div className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${messageStyle(msg.role)}`}>
                         <p className="mb-1 text-[10px] font-medium uppercase opacity-70">{roleLabel(msg.role)}</p>
