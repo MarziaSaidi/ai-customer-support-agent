@@ -67,6 +67,22 @@ export interface Company {
   createdAt: string;
 }
 
+export interface TicketItem {
+  id: number;
+  companyId: number;
+  conversationId: number | null;
+  subject: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  customerEmail: string | null;
+  assignedToUserId: number | null;
+  assignedToName: string | null;
+  internalNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CompanyMember {
   id: number;
   userId: number;
@@ -265,5 +281,42 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ content }),
       token: null,
+    }),
+
+  getTickets: (companyId: number) =>
+    request<TicketItem[]>(`/tickets?companyId=${companyId}`),
+
+  getTicket: (ticketId: number, companyId: number) =>
+    request<TicketItem>(`/tickets/${ticketId}?companyId=${companyId}`),
+
+  createTicket: (
+    companyId: number,
+    data: {
+      subject: string;
+      description?: string;
+      priority?: string;
+      customerEmail?: string;
+      conversationId?: number;
+    }
+  ) =>
+    request<TicketItem>(`/tickets?companyId=${companyId}`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateTicket: (
+    ticketId: number,
+    companyId: number,
+    data: { status?: string; priority?: string; assignedToUserId?: number | null }
+  ) =>
+    request<TicketItem>(`/tickets/${ticketId}?companyId=${companyId}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
+  addTicketNote: (ticketId: number, companyId: number, note: string) =>
+    request<TicketItem>(`/tickets/${ticketId}/notes?companyId=${companyId}`, {
+      method: "POST",
+      body: JSON.stringify({ note }),
     }),
 };
