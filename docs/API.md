@@ -197,12 +197,12 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 |--------|------|------|--------|-------------|
 | POST | `/chat/widget/sessions` | Public | ✅ | Start widget session |
 | POST | `/chat/widget/sessions/{id}/messages` | Public | ✅ | Send customer message |
-| GET | `/chat/sessions` | JWT | ✅ | List company sessions |
-| GET | `/chat/sessions/{id}` | JWT | 🔲 | Get session + messages |
-| POST | `/chat/sessions/{id}/messages` | JWT Agent | 🔲 | Agent reply |
+| GET | `/chat/sessions` | JWT | ✅ | List company conversation summaries |
+| GET | `/chat/sessions/{id}` | JWT | ✅ | Get conversation + messages |
+| POST | `/chat/sessions/{id}/messages` | JWT Agent | ✅ | Agent reply |
 | POST | `/chat/sessions/{id}/escalate` | Public/JWT | ✅ | Escalate to human |
 | POST | `/chat/sessions/{id}/feedback` | Public | 🔲 | Submit rating |
-| POST | `/chat/sessions/{id}/resolve` | JWT Agent | 🔲 | Mark resolved |
+| POST | `/chat/sessions/{id}/resolve` | JWT Agent | ✅ | Mark resolved |
 
 ### POST `/chat/widget/sessions`
 
