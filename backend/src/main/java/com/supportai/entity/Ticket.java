@@ -24,8 +24,8 @@ public class Ticket extends BaseEntity {
     private Company company;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "session_id")
-    private ChatSession session;
+    @JoinColumn(name = "conversation_id")
+    private Conversation conversation;
 
     @Column(nullable = false)
     private String subject;
