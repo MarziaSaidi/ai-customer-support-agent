@@ -280,8 +280,8 @@ These actions are invoked by the AI via function calling (Day 9). Direct REST en
 
 | Method | Path | Auth | Status | Description |
 |--------|------|------|--------|-------------|
-| GET | `/analytics` | JWT | ✅ | Dashboard metrics (`?companyId=`) |
-| GET | `/analytics/questions` | JWT | 🔲 | Most common questions |
+| GET | `/analytics` | JWT | ✅ | Dashboard metrics with trends (`?companyId=`) |
+| GET | `/analytics/questions` | JWT | ✅ | Most common customer questions |
 
 ### GET `/analytics`
 
@@ -289,11 +289,25 @@ These actions are invoked by the AI via function calling (Day 9). Direct REST en
 ```json
 {
   "totalConversations": 150,
+  "resolvedConversations": 112,
   "openTickets": 12,
   "resolvedTickets": 88,
-  "aiResolutionRate": 78.5,
-  "averageResponseTimeMs": 1200,
-  "customerSatisfaction": 4.2
+  "aiResolutionRate": 74.7,
+  "averageResponseTimeMs": 850,
+  "customerSatisfaction": 4.2,
+  "conversationTrend": [
+    { "date": "2026-07-14", "count": 5 },
+    { "date": "2026-07-15", "count": 8 }
+  ],
+  "topQuestions": [
+    { "question": "Where is my order #48291?", "count": 12 }
+  ],
+  "ticketStatusBreakdown": {
+    "open": 4,
+    "inProgress": 2,
+    "resolved": 10,
+    "closed": 1
+  }
 }
 ```
 
