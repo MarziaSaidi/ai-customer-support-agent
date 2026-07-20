@@ -21,7 +21,7 @@ Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 | 9 | AI function calling | ✅ Done | |
 | 10 | Ticket system | ✅ Done | |
 | 11 | Analytics dashboard | ✅ Done | |
-| 12 | Testing | ⚪ Pending | |
+| 12 | Testing | ✅ Done | |
 | 13 | Deployment | ⚪ Pending | |
 | 14 | Portfolio polish | ⚪ Pending | |
 
@@ -240,6 +240,17 @@ User question → Retrieve documents → GPT with context → Answer + source ci
 **Backend:** JUnit, Mockito  
 **API:** Postman collection  
 **Marzia:** define test cases, verify edge cases
+
+- [x] Mockito unit tests for `AiFunctionService` and `TicketService`
+- [x] Security integration tests (auth required, cross-company access denied)
+- [x] Postman collection + local environment (`postman/`)
+- [x] Manual test checklist in `docs/TESTING.md`
+- [x] CI workflow runs backend tests + frontend lint/build
+
+### You (Marzia)
+- [ ] Run `cd backend && ./mvnw test` — all tests pass
+- [ ] Import Postman collection, run Auth → Login, then Chat + Tickets folders
+- [ ] Walk through manual checklist in `docs/TESTING.md`
 
 ---
 
