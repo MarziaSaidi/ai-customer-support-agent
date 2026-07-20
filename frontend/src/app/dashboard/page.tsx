@@ -9,6 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
 import { api, type AnalyticsResponse, type ConversationSummary } from "@/lib/api";
 
+function formatResponseTime(ms: number) {
+  if (ms <= 0) return "—";
+  if (ms < 1000) return `${Math.round(ms)} ms`;
+  return `${(ms / 1000).toFixed(1)} s`;
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
@@ -30,7 +36,7 @@ export default function DashboardPage() {
         <MetricCard title="Conversations" value={analytics?.totalConversations ?? "—"} />
         <MetricCard title="AI Resolution Rate" value={analytics ? `${analytics.aiResolutionRate.toFixed(1)}%` : "—"} />
         <MetricCard title="Open Tickets" value={analytics?.openTickets ?? "—"} />
-        <MetricCard title="Satisfaction" value={analytics ? analytics.customerSatisfaction.toFixed(1) : "—"} />
+        <MetricCard title="Avg Response" value={analytics ? formatResponseTime(analytics.averageResponseTimeMs) : "—"} />
       </div>
 
       <Separator className="my-8" />
@@ -71,6 +77,11 @@ export default function DashboardPage() {
             <Link href="/dashboard/tickets">
               <Button variant="outline" className="w-full justify-start">
                 View support tickets
+              </Button>
+            </Link>
+            <Link href="/dashboard/analytics">
+              <Button variant="outline" className="w-full justify-start">
+                View analytics dashboard
               </Button>
             </Link>
             <Link href="/widget">
