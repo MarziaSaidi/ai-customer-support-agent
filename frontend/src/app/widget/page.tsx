@@ -5,11 +5,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/auth-context";
 import { api, type MessageResponse } from "@/lib/api";
 
-const DEMO_COMPANY_ID = 1;
-
 export default function WidgetPage() {
+  const { user } = useAuth();
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [messages, setMessages] = useState<MessageResponse[]>([]);
   const [input, setInput] = useState("");
@@ -17,14 +17,16 @@ export default function WidgetPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!user?.companyId) return;
+
     api
-      .startWidgetSession(DEMO_COMPANY_ID, "demo@customer.com", "Demo Customer")
+      .startWidgetSession(user.companyId, "demo@customer.com", "Demo Customer")
       .then((session) => {
         setSessionId(session.id);
         setMessages(session.messages);
       })
       .catch(console.error);
-  }, []);
+  }, [user?.companyId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,6 +48,17 @@ export default function WidgetPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!user?.companyId) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center p-6">
+        <p className="text-sm text-muted-foreground">Log in to preview the chat widget for your company.</p>
+        <Link href="/login" className="mt-4">
+          <Button>Log in</Button>
+        </Link>
+      </div>
+    );
   }
 
   return (
