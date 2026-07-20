@@ -49,13 +49,34 @@ export interface ChatSessionResponse {
   messages: MessageResponse[];
 }
 
+export interface TrendPoint {
+  date: string;
+  count: number;
+}
+
+export interface QuestionStat {
+  question: string;
+  count: number;
+}
+
+export interface TicketStatusBreakdown {
+  open: number;
+  inProgress: number;
+  resolved: number;
+  closed: number;
+}
+
 export interface AnalyticsResponse {
   totalConversations: number;
+  resolvedConversations: number;
   openTickets: number;
   resolvedTickets: number;
   aiResolutionRate: number;
   averageResponseTimeMs: number;
   customerSatisfaction: number;
+  conversationTrend: TrendPoint[];
+  topQuestions: QuestionStat[];
+  ticketStatusBreakdown: TicketStatusBreakdown;
 }
 
 export interface Company {
@@ -251,6 +272,9 @@ export const api = {
 
   getAnalytics: (companyId: number) =>
     request<AnalyticsResponse>(`/analytics?companyId=${companyId}`),
+
+  getTopQuestions: (companyId: number) =>
+    request<QuestionStat[]>(`/analytics/questions?companyId=${companyId}`),
 
   getSessions: (companyId: number) =>
     request<ConversationSummary[]>(`/chat/sessions?companyId=${companyId}`),
