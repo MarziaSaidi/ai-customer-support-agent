@@ -240,9 +240,9 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 |--------|------|------|--------|-------------|
 | GET | `/tickets` | JWT | ✅ | List tickets (`?companyId=`) |
 | POST | `/tickets` | JWT | ✅ | Create ticket |
-| GET | `/tickets/{id}` | JWT | 🔲 | Get ticket detail |
-| PATCH | `/tickets/{id}` | JWT Agent | 🔲 | Update status/assignee |
-| POST | `/tickets/{id}/notes` | JWT Agent | 🔲 | Add internal note |
+| GET | `/tickets/{id}` | JWT | ✅ | Get ticket detail |
+| PATCH | `/tickets/{id}` | JWT Agent | ✅ | Update status/priority/assignee |
+| POST | `/tickets/{id}/notes` | JWT Agent | ✅ | Add internal note |
 
 ### POST `/tickets`
 
