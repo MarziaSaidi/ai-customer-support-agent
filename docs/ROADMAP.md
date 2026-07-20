@@ -165,7 +165,17 @@ User question → Retrieve documents → GPT with context → Answer + source ci
 
 **Build:** Chat UI, message history, conversation storage
 
-Rename `chat_sessions` → `conversations` per target schema.
+- [x] Rename `chat_sessions` → `conversations` per target schema
+- [x] Conversation list summaries + detail API (`GET /chat/sessions/{id}`)
+- [x] Agent reply and resolve endpoints
+- [x] Dashboard conversations inbox with message thread
+- [x] Widget uses logged-in user's company ID
+- [x] Chat controller integration tests
+
+### You (Marzia)
+- [ ] Open `/widget`, send a customer message
+- [ ] Open `/dashboard/conversations`, reply as agent, mark resolved
+- [ ] Confirm overview shows recent conversations
 
 ---
 
