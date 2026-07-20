@@ -20,7 +20,7 @@ Aligned with [PROJECT.md](./PROJECT.md). Progress tracked below.
 | 8 | Chat interface | ✅ Done | |
 | 9 | AI function calling | ✅ Done | |
 | 10 | Ticket system | ✅ Done | |
-| 11 | Analytics dashboard | ⚪ Pending | |
+| 11 | Analytics dashboard | ✅ Done | |
 | 12 | Testing | ⚪ Pending | |
 | 13 | Deployment | ⚪ Pending | |
 | 14 | Portfolio polish | ⚪ Pending | |
@@ -221,6 +221,17 @@ User question → Retrieve documents → GPT with context → Answer + source ci
 ## Day 11 — Analytics
 
 **Charts:** conversations, resolved %, common questions, response time
+
+- [x] Enhanced `AnalyticsService` with 7-day trend, ticket breakdown, top questions
+- [x] Real average AI response time from customer → AI message pairs
+- [x] `GET /analytics/questions` endpoint
+- [x] Dashboard analytics page with bar charts (no extra chart library)
+- [x] Analytics controller integration tests
+
+### You (Marzia)
+- [ ] Send a few widget messages, then open `/dashboard/analytics`
+- [ ] Confirm conversation trend, ticket breakdown, and top questions update
+- [ ] Resolve a conversation and confirm resolution rate changes
 
 ---
 
