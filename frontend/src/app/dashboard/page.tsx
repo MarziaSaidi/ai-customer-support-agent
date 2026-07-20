@@ -7,12 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
-import { api, type AnalyticsResponse, type ChatSessionResponse } from "@/lib/api";
+import { api, type AnalyticsResponse, type ConversationSummary } from "@/lib/api";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
-  const [sessions, setSessions] = useState<ChatSessionResponse[]>([]);
+  const [sessions, setSessions] = useState<ConversationSummary[]>([]);
 
   useEffect(() => {
     if (!user?.companyId) return;
@@ -48,11 +48,16 @@ export default function DashboardPage() {
               <ul className="space-y-3">
                 {sessions.slice(0, 5).map((session) => (
                   <li key={session.id} className="flex items-center justify-between text-sm">
-                    <span>{session.customerName || session.customerEmail || `Session #${session.id}`}</span>
+                    <span>{session.customerName || session.customerEmail || `Conversation #${session.id}`}</span>
                     <Badge variant={session.resolved ? "secondary" : "default"}>{session.status}</Badge>
                   </li>
                 ))}
               </ul>
+            )}
+            {sessions.length > 0 && (
+              <Link href="/dashboard/conversations" className="mt-4 inline-block text-sm text-primary hover:underline">
+                View all conversations
+              </Link>
             )}
           </CardContent>
         </Card>
