@@ -14,10 +14,6 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 |--------|------|------|--------|-------------|
 | POST | `/auth/register` | Public | ✅ | Register user + create company |
 | POST | `/auth/login` | Public | ✅ | Login, returns JWT |
-| POST | `/auth/forgot-password` | Public | 🔲 | Send reset email (SendGrid) |
-| POST | `/auth/reset-password` | Public | 🔲 | Reset with token |
-| POST | `/auth/verify-email` | Public | 🔲 | Verify email with token |
-| POST | `/auth/resend-verification` | JWT | 🔲 | Resend verification email |
 | GET | `/auth/me` | JWT | ✅ | Current user profile |
 
 ### POST `/auth/register`
@@ -80,17 +76,18 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 | Method | Path | Auth | Status | Description |
 |--------|------|------|--------|-------------|
 | GET | `/companies/{id}` | JWT | ✅ | Get company profile |
-| PUT | `/companies/{id}` | JWT Admin | 🔲 | Update company details |
-| POST | `/companies/{id}/settings` | JWT Admin | ✅ | Update AI settings |
-| GET | `/companies/{id}/members` | JWT | 🔲 | List team members |
-| POST | `/companies/{id}/invites` | JWT Admin | 🔲 | Invite team member |
-| DELETE | `/companies/{id}/members/{userId}` | JWT Admin | 🔲 | Remove member |
+| PUT | `/companies/{id}` | JWT Admin | ✅ | Update company details + AI settings |
+| GET | `/companies/{id}/members` | JWT | ✅ | List team members |
+| POST | `/companies/{id}/members` | JWT Admin | ✅ | Add an existing user to the team |
+| DELETE | `/companies/{id}/members/{userId}` | JWT Admin | ✅ | Remove member |
 
-### POST `/companies/{id}/settings`
+### PUT `/companies/{id}`
 
 **Request:**
 ```json
 {
+  "name": "Acme Corp",
+  "website": "https://acme.com",
   "aiSystemPrompt": "You are Acme Corp support. Be friendly and concise."
 }
 ```
@@ -141,7 +138,7 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 | POST | `/documents/search` | JWT | ✅ | Semantic search over document chunks |
 | GET | `/documents/{id}` | JWT | 🔲 | Get document metadata |
 | DELETE | `/documents/{id}` | JWT Admin | ✅ | Soft-delete document |
-| POST | `/documents/{id}/reprocess` | JWT Admin | ✅ | Re-queue processing job |
+| POST | `/documents/{id}/reprocess` | JWT Admin | ✅ | Re-run document processing |
 
 ### POST `/documents/search`
 
@@ -200,7 +197,7 @@ Status legend: ✅ Implemented · 🔲 Planned · 🚧 Partial
 | GET | `/chat/sessions` | JWT | ✅ | List company conversation summaries |
 | GET | `/chat/sessions/{id}` | JWT | ✅ | Get conversation + messages |
 | POST | `/chat/sessions/{id}/messages` | JWT Agent | ✅ | Agent reply |
-| POST | `/chat/sessions/{id}/escalate` | Public/JWT | ✅ | Escalate to human |
+| POST | `/chat/sessions/{id}/escalate` | JWT Agent | ✅ | Escalate to human (team members only) |
 | POST | `/chat/sessions/{id}/feedback` | Public | 🔲 | Submit rating |
 | POST | `/chat/sessions/{id}/resolve` | JWT Agent | ✅ | Mark resolved |
 
@@ -310,33 +307,6 @@ These actions are invoked by the AI via function calling (Day 9). Direct REST en
   }
 }
 ```
-
----
-
-## Notifications
-
-| Method | Path | Auth | Status | Description |
-|--------|------|------|--------|-------------|
-| GET | `/notifications` | JWT | 🔲 | List user notifications |
-| PATCH | `/notifications/{id}/read` | JWT | 🔲 | Mark as read |
-| PATCH | `/notifications/read-all` | JWT | 🔲 | Mark all read |
-
----
-
-## WebSocket (STOMP)
-
-Endpoint: `ws://localhost:8080/ws` (SockJS fallback)
-
-| Subscribe | Purpose | Status |
-|-----------|---------|--------|
-| `/topic/chat/{sessionId}` | Live messages | 🔲 |
-| `/topic/typing/{sessionId}` | Typing indicators | 🔲 |
-| `/queue/notifications/{userId}` | Agent alerts | 🔲 |
-
-| Send | Purpose | Status |
-|------|---------|--------|
-| `/app/chat/{sessionId}/message` | Send message | 🔲 |
-| `/app/chat/{sessionId}/typing` | Typing event | 🔲 |
 
 ---
 

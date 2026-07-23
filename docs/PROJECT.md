@@ -58,10 +58,10 @@ When AI cannot answer → create ticket with title, priority, status. Agent reso
 |-------|------------|
 | Frontend | Next.js, React, TypeScript, Tailwind CSS, shadcn/ui |
 | Backend | Java 21, Spring Boot 3, Spring Security, JWT, Spring Data JPA, Hibernate, Maven |
-| Database | PostgreSQL + pgvector |
+| Database | PostgreSQL |
 | AI | OpenAI API, embeddings, RAG, function calling |
-| Storage | AWS S3 (production target); local files for dev |
-| Deployment | Docker, Docker Compose, GitHub Actions, AWS EC2 / Render |
+| Storage | Local filesystem |
+| Deployment | Docker, Docker Compose, GitHub Actions |
 
 ---
 

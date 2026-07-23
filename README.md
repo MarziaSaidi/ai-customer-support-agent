@@ -49,11 +49,11 @@ cd frontend && npm run lint && npm run build
 | Doc | Description |
 |-----|-------------|
 | [PROJECT.md](docs/PROJECT.md) | Product definition & features |
-| [ROADMAP.md](docs/ROADMAP.md) | **14-day development plan** |
-| [RESPONSIBILITIES.md](docs/RESPONSIBILITIES.md) | Marzia vs AI ownership |
+| [ROADMAP.md](docs/ROADMAP.md) | Features & status |
 | [API.md](docs/API.md) | API contract |
-| [DATABASE.md](docs/DATABASE.md) | Schema + migration notes |
-| [DECISIONS.md](docs/DECISIONS.md) | Locked stack choices |
+| [DATABASE.md](docs/DATABASE.md) | Database schema |
+| [DECISIONS.md](docs/DECISIONS.md) | Design decisions & tradeoffs |
+| [TESTING.md](docs/TESTING.md) | Test commands & checklist |
 
 ## Security model
 
