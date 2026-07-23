@@ -108,6 +108,45 @@ docker compose up --build
 
 Postgres starts with a healthcheck and the backend waits for it before booting. Frontend on http://localhost:3000, API on http://localhost:8080.
 
+## Deployment
+
+A common free-tier setup is the frontend on **Vercel** and the backend + **managed PostgreSQL** on **Render** or **Railway** (the backend ships with a `Dockerfile`).
+
+### Backend environment variables
+
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `SPRING_PROFILES_ACTIVE` | ✅ | Set to `docker`. A non-local profile also activates the strong-`JWT_SECRET` startup guard. |
+| `DATABASE_URL` | ✅ | JDBC URL of the managed Postgres, e.g. `jdbc:postgresql://host:5432/support_ai` |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` | ✅ | Database credentials |
+| `JWT_SECRET` | ✅ | 32+ byte random value — `openssl rand -base64 48`. The app refuses to start with the placeholder. |
+| `OPENAI_API_KEY` | ✅ | Real embeddings + GPT answers; without it the app falls back to stub answers |
+| `CORS_ALLOWED_ORIGINS` | ✅ | Your deployed frontend origin, e.g. `https://your-app.vercel.app` |
+| `JWT_EXPIRATION_MS` | — | Token lifetime; defaults to 24h |
+| `LOCAL_STORAGE_PATH` | — | Upload directory; defaults to `./uploads` (see note below) |
+| `WIDGET_RATE_LIMIT` | — | Public-widget requests/min per IP; defaults to `30` |
+
+### Frontend environment variable
+
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `NEXT_PUBLIC_API_URL` | ✅ | Deployed backend base URL **including `/api`**, e.g. `https://your-api.onrender.com/api` |
+
+### Steps
+
+1. Provision a managed PostgreSQL instance; note its JDBC URL and credentials.
+2. Deploy the backend from `backend/` (Docker) with the environment variables above.
+3. Deploy the frontend from `frontend/` (Vercel auto-detects Next.js) with `NEXT_PUBLIC_API_URL`.
+4. Set the backend's `CORS_ALLOWED_ORIGINS` to the deployed frontend origin.
+5. Verify: `GET https://<backend-host>/actuator/health` returns `{"status":"UP"}`.
+
+The schema is created automatically on first boot (Hibernate `ddl-auto: update`).
+
+### Before you go live
+
+- **Set an OpenAI spending limit** in the OpenAI dashboard as a backstop — the public widget is already rate-limited, but a hard cap is cheap insurance.
+- **Uploaded files use the local filesystem, which is ephemeral** on most PaaS hosts (lost on redeploy). Fine for a demo; attach a persistent volume or object storage for durability.
+
 ## Core Features
 
 1. **Company workspace** — multi-tenant accounts, Admin + Support Agent roles
