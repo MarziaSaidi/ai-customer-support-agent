@@ -19,3 +19,7 @@ app:
     allowed-origins: http://localhost:3000
   document-processing:
     mode: sync
+  rate-limit:
+    widget:
+      # Effectively disabled for the shared test context; the limiter has its own unit test.
+      max-requests: 100000
