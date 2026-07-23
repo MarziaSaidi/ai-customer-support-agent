@@ -7,6 +7,7 @@ import com.supportai.dto.UpdateCompanyRequest;
 import com.supportai.service.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,6 +42,7 @@ public class CompanyController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public CompanyResponse updateCompany(
             @PathVariable Long id,
             @Valid @RequestBody UpdateCompanyRequest request,
@@ -59,6 +61,7 @@ public class CompanyController {
 
     @PostMapping("/{id}/members")
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public CompanyMemberResponse addMember(
             @PathVariable Long id,
             @Valid @RequestBody AddMemberRequest request,
@@ -69,6 +72,7 @@ public class CompanyController {
 
     @DeleteMapping("/{id}/members/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void removeMember(
             @PathVariable Long id,
             @PathVariable Long userId,
