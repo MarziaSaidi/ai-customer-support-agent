@@ -43,6 +43,11 @@ app:
   # Documents are processed in a background thread after upload (see SyncDocumentProcessingDispatcher).
   document-processing:
     mode: ${DOCUMENT_PROCESSING_MODE:sync}
+  # Per-IP throttle on the public (unauthenticated) chat widget to limit abuse/AI cost.
+  rate-limit:
+    widget:
+      max-requests: ${WIDGET_RATE_LIMIT:30}
+      window-ms: 60000
 
 management:
   endpoints:
