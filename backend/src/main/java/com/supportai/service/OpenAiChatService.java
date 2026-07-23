@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +38,17 @@ public class OpenAiChatService {
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
         this.model = model;
-        this.restClient = RestClient.create("https://api.openai.com");
+        this.restClient = RestClient.builder()
+                .baseUrl("https://api.openai.com")
+                .requestFactory(timeoutRequestFactory())
+                .build();
+    }
+
+    private static SimpleClientHttpRequestFactory timeoutRequestFactory() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(5));
+        factory.setReadTimeout(Duration.ofSeconds(30));
+        return factory;
     }
 
     public boolean isConfigured() {
