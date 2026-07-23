@@ -1,13 +1,7 @@
-# Use when Docker/PostgreSQL is not installed (Day 2 auth testing).
+# Run without Docker/PostgreSQL using an in-memory H2 database.
 # Run: ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 
 spring:
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
-      - org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
-
   datasource:
     url: jdbc:h2:mem:supportiq;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
     username: sa
@@ -36,5 +30,3 @@ app:
     local-path: ../uploads
   document-processing:
     mode: sync
-  vector-search:
-    mode: in-memory

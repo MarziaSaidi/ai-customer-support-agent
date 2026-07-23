@@ -9,29 +9,7 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16
-        env:
-          POSTGRES_DB: support_ai
-          POSTGRES_USER: support_ai
-          POSTGRES_PASSWORD: support_ai_dev
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U support_ai -d support_ai"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-      rabbitmq:
-        image: rabbitmq:3-alpine
-        ports:
-          - 5672:5672
-
+    # Tests run against an in-memory H2 database, so no service containers are needed.
     steps:
       - uses: actions/checkout@v4
 

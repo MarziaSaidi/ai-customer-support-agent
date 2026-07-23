@@ -8,13 +8,6 @@ spring:
     hibernate:
       ddl-auto: create-drop
     database-platform: org.hibernate.dialect.H2Dialect
-  data:
-    redis:
-      host: localhost
-      port: 6379
-  rabbitmq:
-    host: localhost
-    port: 5672
 
 app:
   jwt:
@@ -26,5 +19,3 @@ app:
     allowed-origins: http://localhost:3000
   document-processing:
     mode: sync
-  vector-search:
-    mode: in-memory
