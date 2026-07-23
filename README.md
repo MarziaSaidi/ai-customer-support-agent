@@ -62,6 +62,7 @@ Authentication and multi-tenant isolation are enforced on every request:
 - **Stateless JWT auth** — `JwtAuthenticationFilter` validates a `Bearer` token per request; invalid, expired, or tampered tokens are rejected with `401/403` (never a `500`). The signing secret must be a strong value — the app **fails fast on startup** outside local dev if `JWT_SECRET` is left as the placeholder.
 - **Tenant isolation** — every tenant-scoped service call verifies the caller's membership in the target company (`requireTeamMember` / `requireMembership`), so a user of Company A cannot read or mutate Company B's data even by guessing IDs.
 - **Role-based access** — privileged operations (company settings, member management) require `ADMIN` via both `@PreAuthorize("hasRole('ADMIN')")` (coarse, first line) and a tenant-aware `requireAdmin` check in the service (the authoritative gate). Authenticated-but-forbidden returns `403`.
+- **Abuse protection** — the public, unauthenticated chat widget is rate-limited per client IP (`RateLimitInterceptor`, default 30 req/min) so an anonymous caller can't flood the AI backend and run up API costs. Excess requests get `429` with a `Retry-After` header.
 
 Cross-tenant and malformed-token behavior is covered by `SecurityIntegrationTest`.
 
@@ -71,7 +72,7 @@ Uploaded documents are chunked, embedded with OpenAI, and the vectors are stored
 
 ## Roadmap / known gaps
 
-Honest list of what a production hardening pass would add next: Flyway migrations (replacing Hibernate `ddl-auto`), rate limiting on auth + the public chat widget, retry/backoff around the OpenAI calls, and user-facing error states on the frontend. If the knowledge base grew large, the cosine-similarity scan would move into the database with a dedicated vector index (e.g. pgvector).
+Honest list of what a production hardening pass would add next: Flyway migrations (replacing Hibernate `ddl-auto`), rate limiting on the authenticated API (the public widget is already throttled), retry/backoff around the OpenAI calls, and user-facing error states on the frontend. If the knowledge base grew large, the cosine-similarity scan would move into the database with a dedicated vector index (e.g. pgvector).
 
 ## Quick Start
 

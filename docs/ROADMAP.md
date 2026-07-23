@@ -17,14 +17,14 @@ What's implemented today, and what a next iteration would add.
 | AI function calling | `checkOrderStatus`, `createTicket`, `cancelOrder`, `requestRefund`, `searchDocumentation` via a bounded tool loop |
 | Ticket system | Create, assign, status/priority updates, internal notes; auto-created on escalation |
 | Analytics | Conversation trend, resolution rate, response time, ticket breakdown, top questions |
-| Security hardening | Tenant-isolation checks, JWT error handling, default-secret guard, admin `@PreAuthorize`, request timeouts on AI calls |
+| Security hardening | Tenant-isolation checks, JWT error handling, default-secret guard, admin `@PreAuthorize`, request timeouts on AI calls, per-IP rate limiting on the public widget |
 | Testing & CI | 30 unit + integration tests (JUnit, Mockito, MockMvc); GitHub Actions runs backend tests + frontend lint/build |
 | Packaging | Docker Compose (Postgres + backend + frontend) |
 
 ## Possible next steps
 
 - Flyway migrations in place of Hibernate `ddl-auto`
-- Rate limiting on auth and the public chat widget
+- Rate limiting on the authenticated API (the public chat widget is already throttled per IP)
 - Retry/backoff around OpenAI calls
 - User-facing error states and a data-fetching layer on the frontend
 - Move retrieval into a database-side vector index (e.g. pgvector) if the knowledge base grows large
