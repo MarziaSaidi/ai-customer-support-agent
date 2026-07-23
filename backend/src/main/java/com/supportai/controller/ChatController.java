@@ -74,8 +74,11 @@ public class ChatController {
     }
 
     @PostMapping("/sessions/{conversationId}/escalate")
-    public ChatSessionResponse escalate(@PathVariable Long conversationId) {
-        return chatService.escalateToAgent(conversationId);
+    public ChatSessionResponse escalate(
+            @PathVariable Long conversationId,
+            @AuthenticationPrincipal UserDetails principal
+    ) {
+        return chatService.escalateToAgent(conversationId, principal.getUsername());
     }
 
     @PostMapping("/sessions/{conversationId}/resolve")

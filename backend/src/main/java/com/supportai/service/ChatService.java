@@ -129,9 +129,12 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatSessionResponse escalateToAgent(Long conversationId) {
+    public ChatSessionResponse escalateToAgent(Long conversationId, String requesterEmail) {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Conversation not found"));
+
+        requireTeamMember(conversation.getCompany().getId(), requesterEmail);
+
         conversation.setStatus(ConversationStatus.ESCALATED);
 
         Message systemMessage = new Message();
