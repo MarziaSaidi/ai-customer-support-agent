@@ -21,37 +21,4 @@ public interface DocumentChunkRepository extends JpaRepository<DocumentChunk, Lo
             WHERE d.company.id = :companyId AND d.active = true AND d.processed = true
             """)
     List<DocumentChunk> findSearchableByCompanyId(@Param("companyId") Long companyId);
-
-    @Query("""
-            SELECT c FROM DocumentChunk c
-            JOIN FETCH c.document d
-            WHERE c.id IN :ids
-            """)
-    List<DocumentChunk> findByIdsWithDocument(@Param("ids") List<Long> ids);
-
-    @Query(value = """
-            SELECT c.id FROM document_chunks c
-            JOIN documents d ON c.document_id = d.id
-            WHERE d.company_id = :companyId AND d.active = true AND d.processed = true
-            ORDER BY c.embedding <=> CAST(:embedding AS vector)
-            LIMIT :limit
-            """, nativeQuery = true)
-    List<Long> findSimilarChunkIdsByCompany(
-            @Param("companyId") Long companyId,
-            @Param("embedding") String embedding,
-            @Param("limit") int limit
-    );
-
-    @Query(value = """
-            SELECT c.* FROM document_chunks c
-            JOIN documents d ON c.document_id = d.id
-            WHERE d.company_id = :companyId AND d.active = true AND d.processed = true
-            ORDER BY c.embedding <=> CAST(:embedding AS vector)
-            LIMIT :limit
-            """, nativeQuery = true)
-    List<DocumentChunk> findSimilarByCompany(
-            @Param("companyId") Long companyId,
-            @Param("embedding") String embedding,
-            @Param("limit") int limit
-    );
 }

@@ -7,36 +7,38 @@ import com.supportai.repository.DocumentChunkRepository;
 import com.supportai.repository.UserRepository;
 import com.supportai.exception.UnauthorizedException;
 import com.supportai.util.CosineSimilarity;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Ranks a company's document chunks against a query using cosine similarity over their
+ * embeddings, blended with a small keyword-overlap score. Search is scoped to the caller's
+ * company so tenants never see each other's knowledge base.
+ */
 @Service
 public class VectorSearchService {
 
     private static final int DEFAULT_LIMIT = 5;
+    private static final int MAX_LIMIT = 20;
 
     private final DocumentChunkRepository documentChunkRepository;
     private final EmbeddingService embeddingService;
     private final CompanyUserRepository companyUserRepository;
     private final UserRepository userRepository;
-    private final String mode;
 
     public VectorSearchService(
             DocumentChunkRepository documentChunkRepository,
             EmbeddingService embeddingService,
             CompanyUserRepository companyUserRepository,
-            UserRepository userRepository,
-            @Value("${app.vector-search.mode:in-memory}") String mode
+            UserRepository userRepository
     ) {
         this.documentChunkRepository = documentChunkRepository;
         this.embeddingService = embeddingService;
         this.companyUserRepository = companyUserRepository;
         this.userRepository = userRepository;
-        this.mode = mode;
     }
 
     public List<DocumentChunkMatchResponse> search(
@@ -50,46 +52,9 @@ public class VectorSearchService {
     }
 
     public List<DocumentChunkMatchResponse> searchForCompany(Long companyId, String query, Integer limit) {
-        int resultLimit = limit != null && limit > 0 ? Math.min(limit, 20) : DEFAULT_LIMIT;
+        int resultLimit = limit != null && limit > 0 ? Math.min(limit, MAX_LIMIT) : DEFAULT_LIMIT;
         float[] queryEmbedding = embeddingService.embed(query);
 
-        List<DocumentChunkMatchResponse> results = "pgvector".equalsIgnoreCase(mode)
-                ? searchWithPgVector(companyId, queryEmbedding, resultLimit)
-                : searchInMemory(companyId, query, queryEmbedding, resultLimit);
-
-        return results.stream()
-                .sorted(Comparator.comparingDouble(DocumentChunkMatchResponse::score).reversed())
-                .limit(resultLimit)
-                .toList();
-    }
-
-    private List<DocumentChunkMatchResponse> searchWithPgVector(
-            Long companyId,
-            float[] queryEmbedding,
-            int limit
-    ) {
-        String embeddingLiteral = embeddingService.toPgVectorLiteral(queryEmbedding);
-        List<Long> chunkIds = documentChunkRepository.findSimilarChunkIdsByCompany(
-                companyId,
-                embeddingLiteral,
-                limit
-        );
-
-        if (chunkIds.isEmpty()) {
-            return List.of();
-        }
-
-        return documentChunkRepository.findByIdsWithDocument(chunkIds).stream()
-                .map(chunk -> toMatch(chunk, 1.0))
-                .toList();
-    }
-
-    private List<DocumentChunkMatchResponse> searchInMemory(
-            Long companyId,
-            String query,
-            float[] queryEmbedding,
-            int limit
-    ) {
         return documentChunkRepository.findSearchableByCompanyId(companyId).stream()
                 .map(chunk -> {
                     double vectorScore = CosineSimilarity.calculate(queryEmbedding, chunk.getEmbedding());
@@ -98,7 +63,7 @@ public class VectorSearchService {
                     return toMatch(chunk, score);
                 })
                 .sorted(Comparator.comparingDouble(DocumentChunkMatchResponse::score).reversed())
-                .limit(limit)
+                .limit(resultLimit)
                 .toList();
     }
 
