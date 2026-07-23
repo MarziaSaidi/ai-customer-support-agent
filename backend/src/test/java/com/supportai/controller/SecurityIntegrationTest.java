@@ -54,6 +54,31 @@ class SecurityIntegrationTest {
     }
 
     @Test
+    void userCannotEscalateAnotherCompanyConversation() throws Exception {
+        // Company A actor
+        registerCompany("escalate-a@test.com", "Escalate A");
+        String tokenA = loginToken("escalate-a@test.com");
+
+        // Company B owns the conversation, created through the public widget
+        Long companyB = registerCompany("escalate-b@test.com", "Escalate B");
+        Long conversationB = startWidgetConversation(companyB);
+
+        mockMvc.perform(post("/api/chat/sessions/" + conversationB + "/escalate")
+                        .header("Authorization", "Bearer " + tokenA))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("You do not have access to this company"));
+    }
+
+    @Test
+    void malformedTokenIsRejectedNotServerError() throws Exception {
+        // Before hardening the filter this threw a JwtException and surfaced as HTTP 500.
+        mockMvc.perform(get("/api/tickets")
+                        .param("companyId", "1")
+                        .header("Authorization", "Bearer not-a-real-jwt"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void createTicketRequiresSubject() throws Exception {
         Long companyId = registerCompany("validation@test.com", "Validation Co");
         String token = loginToken("validation@test.com");
@@ -86,6 +111,17 @@ class SecurityIntegrationTest {
 
         return objectMapper.readTree(result.getResponse().getContentAsString())
                 .get("companyId").asLong();
+    }
+
+    private Long startWidgetConversation(Long companyId) throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/chat/widget/sessions")
+                        .param("companyId", companyId.toString())
+                        .param("customerEmail", "customer@test.com"))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        return objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("id").asLong();
     }
 
     private String loginToken(String email) throws Exception {

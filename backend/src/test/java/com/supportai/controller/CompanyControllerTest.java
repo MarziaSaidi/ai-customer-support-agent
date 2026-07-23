@@ -138,10 +138,12 @@ class CompanyControllerTest {
         String agentToken = objectMapper.readTree(agentLogin.getResponse().getContentAsString())
                 .get("token").asText();
 
+        // @PreAuthorize("hasRole('ADMIN')") blocks the non-admin before the service layer runs;
+        // authenticated-but-forbidden is a 403, not a 401.
         mockMvc.perform(put("/api/companies/" + companyId)
                         .header("Authorization", "Bearer " + agentToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Hacked\"}"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 }
