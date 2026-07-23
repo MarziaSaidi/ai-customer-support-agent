@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +36,17 @@ public class EmbeddingService {
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
         this.model = model;
-        this.restClient = RestClient.create("https://api.openai.com");
+        this.restClient = RestClient.builder()
+                .baseUrl("https://api.openai.com")
+                .requestFactory(timeoutRequestFactory())
+                .build();
+    }
+
+    private static SimpleClientHttpRequestFactory timeoutRequestFactory() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(Duration.ofSeconds(5));
+        factory.setReadTimeout(Duration.ofSeconds(20));
+        return factory;
     }
 
     public float[] embed(String text) {
@@ -67,18 +79,6 @@ public class EmbeddingService {
             log.warn("OpenAI embedding failed, using stub embedding: {}", ex.getMessage());
             return stubEmbedding(text);
         }
-    }
-
-    public String toPgVectorLiteral(float[] vector) {
-        StringBuilder builder = new StringBuilder("[");
-        for (int i = 0; i < vector.length; i++) {
-            if (i > 0) {
-                builder.append(',');
-            }
-            builder.append(vector[i]);
-        }
-        builder.append(']');
-        return builder.toString();
     }
 
     private float[] toFloatArray(JsonNode embeddingNode) {
