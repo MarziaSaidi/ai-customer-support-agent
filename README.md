@@ -2,6 +2,10 @@
 
 A multi-tenant SaaS platform that uses **Retrieval-Augmented Generation (RAG)** to help businesses automate customer support — answering questions from documentation, creating tickets, and analyzing conversations.
 
+**🔗 Live demo: https://supportiq-theta.vercel.app**
+
+> Hosted on a free tier — the backend sleeps when idle, so the first request after inactivity can take ~30–50s to wake up, then it's fast.
+
 ## Architecture
 
 Intentionally lean — a few well-understood pieces rather than a wide stack of half-used infrastructure.
