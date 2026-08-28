@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { useAuth } from "@/contexts/auth-context";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,8 @@ const navItems = [
   { href: "/dashboard/settings", label: "Settings" },
 ];
 
+const WIDGET_ITEM = { href: "/widget", label: "Chat widget" };
+
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, profile, logout } = useAuth();
@@ -25,58 +28,105 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">
+      <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <span
+              aria-hidden="true"
+              className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground"
+            >
               IQ
-            </div>
-            <span className="text-lg font-semibold">SupportIQ</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <p className="text-sm font-medium">
+            </span>
+            <span className="text-lg font-semibold tracking-tight">SupportIQ</span>
+          </Link>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
+            <div className="hidden text-right sm:block">
+              <p className="text-sm leading-tight font-medium">
                 {user.firstName} {user.lastName}
               </p>
               {profile?.companyName && (
-                <p className="text-xs text-muted-foreground">{profile.companyName}</p>
+                <p className="text-xs leading-tight text-muted-foreground">{profile.companyName}</p>
               )}
             </div>
-            <Badge variant="secondary">{user.role}</Badge>
+            <Badge variant="secondary" className="hidden sm:inline-flex">
+              {user.role}
+            </Badge>
             <Button variant="outline" size="sm" onClick={logout}>
               Log out
             </Button>
           </div>
         </div>
+
+        {/* Below md the sidebar is hidden, so the same destinations live here as
+            a scrollable strip — without it the dashboard has no navigation at all
+            on a phone. */}
+        <nav
+          aria-label="Sections"
+          className="mx-auto max-w-6xl overflow-x-auto px-4 pb-2 sm:px-6 md:hidden"
+        >
+          <ul className="flex w-max items-center gap-1">
+            {[...navItems, WIDGET_ITEM].map((item) => (
+              <li key={item.href}>
+                <NavLink item={item} active={pathname === item.href} className="whitespace-nowrap" />
+              </li>
+            ))}
+          </ul>
+        </nav>
       </header>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-1 gap-8 px-6 py-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 gap-8 px-4 py-8 sm:px-6">
         <aside className="hidden w-48 shrink-0 md:block">
-          <nav className="space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "block rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  pathname === item.href
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link
-              href="/widget"
-              className="block rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              Chat widget
-            </Link>
+          <nav aria-label="Sections" className="sticky top-24">
+            <ul className="space-y-1">
+              {navItems.map((item) => (
+                <li key={item.href}>
+                  <NavLink item={item} active={pathname === item.href} className="block" />
+                </li>
+              ))}
+            </ul>
+            <hr className="my-3 border-border" />
+            <NavLink
+              item={WIDGET_ITEM}
+              active={pathname === WIDGET_ITEM.href}
+              className="block"
+            />
           </nav>
         </aside>
-        <div className="min-w-0 flex-1">{children}</div>
+
+        <main className="min-w-0 flex-1 space-y-8">{children}</main>
       </div>
     </div>
+  );
+}
+
+function NavLink({
+  item,
+  active,
+  className,
+}: {
+  item: { href: string; label: string };
+  active: boolean;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={item.href}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "rounded-md px-3 py-2 text-sm font-medium transition-colors outline-none",
+        "focus-visible:ring-3 focus-visible:ring-ring/50",
+        active
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+        className
+      )}
+    >
+      {item.label}
+    </Link>
   );
 }
