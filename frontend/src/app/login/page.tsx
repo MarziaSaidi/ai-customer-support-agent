@@ -3,12 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { GuestRoute } from "@/components/auth/guest-route";
 import { useAuth } from "@/contexts/auth-context";
-import { ApiError } from "@/lib/api";
+import { errorMessage } from "@/lib/use-async";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -24,11 +25,7 @@ export default function LoginPage() {
     try {
       await login(form.get("email") as string, form.get("password") as string);
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else {
-        setError("Login failed");
-      }
+      setError(errorMessage(err, "Login failed"));
     } finally {
       setLoading(false);
     }
@@ -36,36 +33,57 @@ export default function LoginPage() {
 
   return (
     <GuestRoute>
-      <div className="flex flex-1 items-center justify-center px-4 py-12">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Welcome back</CardTitle>
-            <CardDescription>Log in to your SupportIQ dashboard.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" autoComplete="email" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" name="password" type="password" autoComplete="current-password" required />
-              </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Logging in..." : "Log in"}
-              </Button>
-            </form>
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-primary hover:underline">
-                Sign up
-              </Link>
+      <AuthShell
+        title="Welcome back"
+        description="Log in to your SupportIQ dashboard."
+        footer={
+          <>
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/register"
+              className="rounded-md font-medium text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              Sign up
+            </Link>
+          </>
+        }
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              aria-invalid={error ? true : undefined}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              aria-invalid={error ? true : undefined}
+              required
+            />
+          </div>
+
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
             </p>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+
+          <Button type="submit" size="lg" className="w-full" disabled={loading}>
+            {loading && <Spinner className="size-3.5" />}
+            {loading ? "Logging in" : "Log in"}
+          </Button>
+        </form>
+      </AuthShell>
     </GuestRoute>
   );
 }
